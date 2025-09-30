@@ -31,7 +31,7 @@ const Header = () => {
               style={{ fontFamily: 'Ananda' }}
               onClick={() => navigate(`/`)}>
               {/* Nadark */}
-              {import.meta.env.VITE_APP_NAME}
+              NaDark
             </h1>
 
             <ProfileMenu className='flex-grow-1' />
@@ -49,7 +49,7 @@ const Header = () => {
               onClick={() => navigate(`/`)}
               style={{ fontFamily: 'Ananda' }}>
               {/* Nadark */}
-              {import.meta.env.VITE_APP_NAME}
+              NaDark
             </h1>
           </div>
 
