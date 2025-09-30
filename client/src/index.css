@@ -1,0 +1,118 @@
+:root {
+    --color-white: #fff;
+    --color-black: #000;
+
+    --color-bg-dark: #333;
+    --color-bg-nav: #444;
+    --color-bg-hover: #666;
+
+    --color-bg-content: #f4f4f4;
+    --color-bg-sidebar: #e2e2e2;
+
+    --color-text-light: #fff;
+    --color-text-dark: #000;
+    --color-text-muted: #6c757d;
+    --color-text-link: #0d6efd;
+    --color-text-link-hover: #0a58ca;
+
+    --color-bg-badge: #4f5052;
+    --color-bg-badge-hover: #949697;
+    --color-bg-badge-active: #2f3031;
+    --color-bg-disabled: #adb5bd;
+
+    --color-border: #ccc;
+    --color-border-light: #ddd;
+    --color-border-dark: #222;
+
+    --color-shadow: rgba(0, 0, 0, 0.1);
+    --color-shadow-hover: rgba(0, 0, 0, 0.2);
+
+    --color-success: #198754;
+    --color-warning: #ffc107;
+    --color-danger: #dc3545;
+    --color-info: #0dcaf0;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+.app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: var(--color-bg-content);
+    color: var(--color-text-dark);
+}
+
+.header {
+    background: #444;
+    color: #fff;
+    padding: 1rem;
+}
+
+.container {
+    max-width: 1000px;
+}
+
+.footer {
+    background: #222;
+    color: #fff;
+    padding: 1rem;
+    text-align: center;
+}
+
+.btn-primary {
+    background-color: var(--color-bg-badge);
+    border-color: var(--color-bg-badge);
+    color: var(--color-text-light);
+}
+
+.btn-primary:hover {
+    background-color: var(--color-bg-badge-hover);
+    border-color: var(--color-bg-badge-hover);
+    color: var(--color-bg-content);
+    cursor: pointer;
+}
+
+.btn-primary:disabled,
+.btn-primary.disabled {
+    background-color: var(--color-bg-disabled);
+    border-color: var(--color-bg-disabled);
+    color: var(--color-text-disabled);
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+/* Overlay mờ nền */
+.cus-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.tippy-box{
+    background-color: white;
+    color: black;
+    border-radius: 8px;
+}
+
+.tippy-content{
+    max-width: 50vw;
+    padding: 8px;
+}

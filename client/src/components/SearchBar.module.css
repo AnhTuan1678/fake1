@@ -1,0 +1,127 @@
+.search-bar {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 600px;
+    border: 1px solid #ccc;
+    border-radius: 30px;
+    overflow: hidden;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s;
+}
+
+.search-bar:hover {
+    box-shadow: 0 4px 10px rgba(190, 60, 60, 0.15);
+}
+
+.search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 10px 15px;
+    font-size: 1em;
+}
+
+.search-btn {
+    background: var(--color-white);
+    color: var(--color-bg-dark);
+    border: none;
+    border-left: 1px solid var(--color-shadow);
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.search-btn:hover {
+    background: var(--color-bg-badge);
+    color: var(--color-white);
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.search-btn:hover .icon {
+    animation: spin 0.4s linear normal;
+}
+
+.wrapper {
+    position: relative;
+}
+
+.dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: var(--color-bg-hover);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 0;
+    margin-top: 5px;
+    list-style: none;
+    box-shadow: 0 4px 12px var(--color-shadow-hover);
+    overflow: hidden;
+    z-index: 100;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    border-bottom: 1px solid var(--color-bg-dark);
+}
+
+.highlighted {
+    background-color: var(--color-bg-nav);
+}
+
+.dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.book-cover {
+    width: 50px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 4px;
+    flex-shrink: 0;
+    border: 1px solid var(--color-border);
+}
+
+.book-info {
+    display: flex;
+    flex-direction: column;
+    color: var(--color-white);
+    overflow: hidden;
+}
+
+.book-title {
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.book-author,
+.book-meta {
+    font-size: 12px;
+    color: var(--color-text-light);
+    display: flex;
+    gap: 8px;
+}
+
+.book-meta span {
+    white-space: nowrap;
+}

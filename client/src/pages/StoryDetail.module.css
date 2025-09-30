@@ -1,0 +1,89 @@
+.story-image {
+    max-width: 250px;
+    max-height: 500px;
+    margin-right: 20px;
+    border-radius: 10px;
+}
+
+.genre-badge {
+    /* flex: 0 0 auto; */
+    max-width: 120px;
+    background-color: var(--color-bg-badge);
+    color: var(--color-text-light);
+    border-radius: 5px;
+    padding: 5px 10px;
+    margin-right: 5px;
+    font-size: 0.9em;
+    transition: background-color 0.3s, color 0.3s;
+}
+.genre-badge:hover {
+    background-color: var(--color-bg-badge-hover);
+    color: var(--color-bg-content);
+    cursor: pointer;
+}
+
+.label {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.chapterItem {
+    font-size: small;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chapterItem:hover {
+    background-color: var(--color-bg-hover);
+    color: var(--color-text-light);
+    cursor: pointer;
+}
+
+/* Chương đã đọc */
+.readChapter {
+    opacity: 0.5;
+}
+
+/* Chương đang đọc */
+.currentChapter {
+    background-color: #ffeaa7;
+    font-weight: bold;
+    border: 1px solid #fdcb6e;
+}
+
+.cus-btn {
+    background: var(--color-bg-badge-hover) !important;
+}
+
+.cus-btn:hover {
+    color: var(--color-bg-content) !important;
+    background: var(--color-bg-nav) !important;
+}
+
+.btn-yellow {
+    background-color: #f1c40f; /* màu vàng */
+    color: #fff;
+    border: none;
+}
+
+.btn-yellow:hover {
+    background-color: #d4ac0d;
+}
+
+.btn-blue {
+    background-color: #3498db; /* màu xanh */
+    color: #fff;
+    border: none;
+}
+
+.btn-blue:hover {
+    background-color: #2c80b4;
+}
+
+/* giữ style custom chung */
+.cus-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem; /* 6px */
+    font-weight: 500;
+}

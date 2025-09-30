@@ -1,0 +1,14 @@
+.cusBtn {
+    background-color: rgba(0, 0, 0, 0.2);
+    display: none;
+}
+
+.cusBtn:hover {
+    background-color: rgba(0, 0, 0, 0.2);
+    border: none;
+    outline: none;
+}
+
+.avatar:hover .cusBtn{
+    display: inline;
+}
