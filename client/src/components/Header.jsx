@@ -30,8 +30,7 @@ const Header = () => {
               className={`logo ${style.logo} fs-1 me-4 text-white animate__animated animate__fadeInLeft flex-grow-1`}
               style={{ fontFamily: 'Ananda' }}
               onClick={() => navigate(`/`)}>
-              {/* Nadark */}
-              {import.meta.env.VITE_APP_NAME}
+              Nadark
             </h1>
 
             <ProfileMenu className='flex-grow-1' />
@@ -48,8 +47,7 @@ const Header = () => {
               className={`logo ${style.logo} fs-1 me-4 text-white animate__animated animate__fadeInLeft  cursor-pointer d-inline-block`}
               onClick={() => navigate(`/`)}
               style={{ fontFamily: 'Ananda' }}>
-              {/* Nadark */}
-              {import.meta.env.VITE_APP_NAME}
+              Nadark
             </h1>
           </div>
 
