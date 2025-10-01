@@ -409,14 +409,14 @@ async function recalculateBookMeta() {
 }
 
 ;(async () => {
-  await seedUsers(100)
-  await seedBooksAndChapters(60, 10, 1000)
-  await seedReviews(1000)
-  await seedCommentsTwoStep({ total: 150000, batchSize: 5000, replyRatio: 0.2 })
+  await seedUsers(10)
+  await seedBooksAndChapters(6, 10, 100)
+  await seedReviews(100)
+  await seedCommentsTwoStep({ total: 15000, batchSize: 500, replyRatio: 0.2 })
     .then(() => console.log('Script finished'))
     .catch((e) => console.error(e))
-  await seedUserBookshelf(30)
-  await seedUserProgress(5, 40)
+  await seedUserBookshelf(3)
+  await seedUserProgress(1, 5)
   console.log('🎉 Seed script finished!')
   await recalculateBookMeta()
   await db.sequelize.close()

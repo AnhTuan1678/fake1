@@ -4,7 +4,7 @@
     "main": "index.js",
     "type": "commonjs",
     "scripts": {
-        "db": "node fakeData.js",
+        "db": "node --env-file=.env fakeData.js",
         "start": "node --env-file=.env index.js",
         "dev": "nodemon --env-file=.env index.js"
     },
