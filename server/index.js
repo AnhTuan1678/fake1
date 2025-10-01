@@ -17,6 +17,9 @@ app.use(express.urlencoded({ extended: true }))
 const tempPath = path.join(__dirname, 'src/temp')
 app.use('/temp', express.static(tempPath))
 
+const publicPath = path.join(__dirname, 'public')
+app.use('/public', express.static(publicPath))
+
 // =====================
 // PHỤC VỤ FRONTEND VITE BUILD
 // =====================

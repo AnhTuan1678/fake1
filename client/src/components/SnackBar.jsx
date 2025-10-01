@@ -34,7 +34,9 @@ const Snackbar = ({ status = 'success', message = '', onClose }) => {
 
   return (
     <div
-      className={`toast show position-fixed bottom-0 end-0 m-3 ${bgClass} text-white`}
+      className={`toast show position-fixed ${
+        window.innerWidth < 768 ? 'bottom-0 end-0' : ' top-0 left-0'
+      } m-3 ${bgClass} text-white`}
       role='alert'
       aria-live='assertive'
       aria-atomic='true'

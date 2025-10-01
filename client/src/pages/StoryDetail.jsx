@@ -5,6 +5,10 @@ import {
   getChapters,
   getProgressByBook,
   addToBookshelf,
+  getReviewsByBook,
+  createReview,
+  updateReview,
+  deleteReview,
 } from '../services/api'
 import styles from './StoryDetail.module.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -15,7 +19,11 @@ import {
   faFlag,
 } from '@fortawesome/free-solid-svg-icons'
 import Snackbar from '../components/SnackBar'
+import { CommentItem } from '../components/CommentItem'
+import { StarRating } from '../components/StartRating'
+import { ReviewForm } from '../components/ReviewForm'
 import { formatterStoryDetail } from '../utils/formatter'
+import { useSelector } from 'react-redux'
 
 const StoryDetail = () => {
   const { id } = useParams()
@@ -24,12 +32,27 @@ const StoryDetail = () => {
   const [chapters, setChapters] = useState(null)
   const [progress, setProgress] = useState(null)
   const [snack, setSnack] = useState(null)
+  const [showAllChapters, setShowAllChapters] = useState(false)
+  const [avgRating, setAvgRating] = useState(0)
+
+  const visibleChaptersDefault = 30
+
+  const currentUser = useSelector((state) => state.user)
+
+  const [reviews, setReview] = useState([])
+
+  const [myReview, setMyReview] = useState(null)
 
   // lấy thông tin sách
   useEffect(() => {
     const fetchData = async () => {
       const data = await getStoryDetails(id)
       setStoryDetails(data)
+      setAvgRating(
+        data.reviewCount > 0
+          ? (data.totalRating / data.reviewCount).toFixed(1)
+          : 0,
+      )
     }
 
     fetchData()
@@ -40,6 +63,7 @@ const StoryDetail = () => {
     const fetchChapters = async () => {
       const chapterData = await getChapters(id)
       setChapters(chapterData)
+      setShowAllChapters(chapterData.length <= visibleChaptersDefault)
     }
 
     fetchChapters()
@@ -61,11 +85,53 @@ const StoryDetail = () => {
     fetchProgress()
   }, [id])
 
+  // Lấy review
+  useEffect(() => {
+    const fetchReview = async () => {
+      const review = await getReviewsByBook(id)
+      const r = review.find((c) => c.user_id === currentUser.id) || null
+      setMyReview(r)
+      setReview(review.filter((r) => r.user_id !== currentUser.id))
+    }
+    fetchReview()
+  }, [currentUser.id, id])
+
   const handleFollowButton = async () => {
     const token = localStorage.getItem('token')
     const res = await addToBookshelf(token, id)
     setSnack(res)
     setStoryDetails(formatterStoryDetail(res.book))
+  }
+
+  const handleAddReview = async ({ content = '', rating }) => {
+    if (!content.trim()) return
+    const token = localStorage.getItem('token')
+    if (!token) {
+      setSnack({ message: 'Chưa đăng nhập', status: 'warning' })
+      return
+    }
+    const res = await createReview(token, id, content, rating)
+    res.User = { ...currentUser, avatar_url: currentUser.avatarUrl }
+    return res
+  }
+
+  const handleSaveReview = async ({ content, rating, reviewId }) => {
+    if (!content.trim()) return
+    const token = localStorage.getItem('token')
+    if (!token) {
+      setSnack({ message: 'Chưa đăng nhập', status: 'warning' })
+      return
+    }
+    const res = await updateReview(token, reviewId, content, rating)
+    res.User = { ...currentUser, avatar_url: currentUser.avatarUrl }
+    return res
+  }
+
+  const handleDeletePreview = async (id) => {
+    if (!id) return
+    const token = localStorage.getItem('token')
+    const res = await deleteReview(token, id)
+    setSnack(res)
   }
 
   const InfoItem = ({ label, value }) => {
@@ -128,6 +194,12 @@ const StoryDetail = () => {
                   </div>
                 ))}
               </div>
+              {avgRating && (
+                <InfoItem
+                  label='Đánh giá'
+                  value={<StarRating rating={parseFloat(avgRating)} />}
+                />
+              )}
               <div>
                 <InfoItem label='Tác giả' value={storyDetails.author} />
               </div>
@@ -192,14 +264,50 @@ const StoryDetail = () => {
         <div className='d-flex flex-column mb-4 p-4 border rounded'>
           <h3>Chapters</h3>
           <div className='row row-cols-1 row-cols-sm-2 row-cols-lg-3'>
-            {chapters.map((chapter) => (
-              <div className='col' key={chapter.chapterId}>
+            {chapters.map((chapter, index) => (
+              <div
+                className={`col ${
+                  visibleChaptersDefault > index || showAllChapters
+                    ? ''
+                    : 'd-none'
+                }`}
+                key={chapter.chapterId}>
                 <ChapterItem chapter={chapter} />
               </div>
             ))}
+            {visibleChaptersDefault < chapters.length && !showAllChapters && (
+              <div className='text-center mt-3 w-100'>
+                <button
+                  className='btn btn-light'
+                  onClick={() => setShowAllChapters(true)}>
+                  Xem thêm
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
+      {/* Đánh giá */}
+      <div className='d-flex flex-column mb-4 p-4 border rounded'>
+        <h3>Review</h3>
+        {myReview && (
+          <ReviewForm
+            myReview={myReview}
+            handleAddReview={handleAddReview}
+            handleSaveReview={handleSaveReview}
+            deleteReview={deleteReview}
+            handleDeletePreview={handleDeletePreview}
+            setSnack={setSnack}
+          />
+        )}
+
+        <p className='fw-bold'>Đánh giá của người khác:</p>
+        {reviews
+          .filter((c) => c.userId !== currentUser.id)
+          .map((review) => (
+            <CommentItem key={review.id} comment={review} />
+          ))}
+      </div>
     </div>
   )
 }

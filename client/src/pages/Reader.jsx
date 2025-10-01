@@ -6,7 +6,8 @@ import {
   saveProgress,
   updateSettings,
   getProfile,
-  getChapters,
+  createComment,
+  getCommentsByChapter,
 } from '../services/api'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import styles from './Reader.module.css'
@@ -20,8 +21,14 @@ import {
   faTimes,
   faSave,
   faRefresh,
+  faComment,
 } from '@fortawesome/free-solid-svg-icons'
 import TableOfContents from '../components/TableOfContents'
+import { CommentItem } from '../components/CommentItem'
+import { CommentBox } from '../components/CommentBox'
+import { useSelector } from 'react-redux'
+import { buildCommentTree } from '../utils/buildCommentTree'
+import { timeAgo } from '../utils/timeAgo'
 
 const Reader = () => {
   const defaultSetting = {
@@ -34,19 +41,24 @@ const Reader = () => {
   const { chapterIndex, id } = useParams(1)
   const navigate = useNavigate()
 
+  const currentUser = useSelector((state) => state.user)
+
   const [content, setContent] = useState('')
   const [storyDetails, setStoryDetails] = useState({})
   const [showSettings, setShowSettings] = useState(false)
   const [setting, setSetting] = useState(defaultSetting)
-  const [chapters, setChapters] = useState(null)
   const [showTOC, setShowTOC] = useState(false)
+  const [comments, setComments] = useState([])
+  const [replyTo, setReplyTo] = useState(null)
 
   // Lấy nội dung chương
   useEffect(() => {
     const fetchContent = async () => {
       const data = await getChapterContent(chapterIndex, id)
+      const comments = await getCommentsByChapter(data.id)
       window.scrollTo({ top: 0, behavior: 'smooth' })
       setContent(data)
+      setComments(comments)
     }
 
     // Lưu tiến trình đọc khi load chương
@@ -70,16 +82,6 @@ const Reader = () => {
     }
 
     fetchStoryDetails()
-  }, [id])
-
-  // lấy danh sách chương
-  useEffect(() => {
-    const fetchChapters = async () => {
-      const chapterData = await getChapters(id)
-      setChapters(chapterData)
-    }
-
-    fetchChapters()
   }, [id])
 
   // Lấy setting
@@ -142,6 +144,21 @@ const Reader = () => {
         console.error('Lỗi khi lưu setting:', err)
       }
     }
+  }
+
+  const handleReply = (commentId) => {
+    setReplyTo(commentId)
+  }
+
+  const handleSendComment = async (message, parentId = null) => {
+    if (!message || !message.trim()) return
+
+    const token = localStorage.getItem('token')
+    const res = await createComment(token, content.id, message, parentId)
+    res.User = { ...currentUser, avatar_url: currentUser.avatarUrl }
+
+    setComments([res, ...comments]) // thêm vào đầu
+    setReplyTo(null) // reset reply nếu có
   }
 
   const ChapterNavigation = (className) => {
@@ -336,7 +353,7 @@ const Reader = () => {
       <div className='container mx-auto p-4 flex-grow-1'>
         {showTOC && (
           <TableOfContents
-            items={chapters.map((chapter) => chapter.title)}
+            bookId={id}
             onClose={() => setShowTOC(false)}
             currentIndex={chapterIndex}
           />
@@ -392,6 +409,67 @@ const Reader = () => {
             </div>
           </>
         )}
+
+        {/* Bình luận */}
+        <div className='d-flex flex-column mb-4 p-4 border rounded'>
+          <h3>Bình luận</h3>
+          <CommentBox
+            defaultContent=''
+            onCancel={null}
+            onSend={(mess) => handleSendComment(mess)}
+            focus={false}
+          />
+          {buildCommentTree(comments).map((comment) => (
+            <div className='border p-2 mb-2' key={comment.id}>
+              <CommentItem comment={comment} />
+              <div className='d-flex flex-row align-items-center'>
+                <h6 className='me-3'>{timeAgo(comment.created_at)}</h6>
+                <button
+                  className='btn btn-light m-0 p-0 d-flex flex-row'
+                  onClick={() => handleReply(comment.id)}
+                  style={{ color: 'var(--color-bg-badge)' }}>
+                  <FontAwesomeIcon icon={faComment} />
+                  <p className='p-0 m-0'>Trả lời</p>
+                </button>
+              </div>
+              {replyTo === comment.id && (
+                <CommentBox
+                  defaultContent=''
+                  onCancel={() => setReplyTo(null)}
+                  onSend={(mess) => handleSendComment(mess, comment.id)}
+                />
+              )}
+              {/* Hiển thị replies lồng nhau */}
+              {comment.replies?.length > 0 && (
+                <div className='ms-5'>
+                  {comment.replies.map((reply) => (
+                    <div className='' key={reply.id}>
+                      <CommentItem comment={reply} />
+                      <div className='d-flex flex-row align-items-center'>
+                        <h6 className='me-3'>{timeAgo(comment.created_at)}</h6>
+                        <button
+                          className='btn btn-light m-0 p-0 d-flex flex-row'
+                          onClick={() => handleReply(reply.id)}
+                          style={{ color: 'var(--color-bg-badge)' }}>
+                          <FontAwesomeIcon icon={faComment} />
+                          <h6>Trả lời</h6>
+                        </button>
+                      </div>
+                      {replyTo === reply.id && (
+                        <CommentBox
+                          defaultContent={`@${reply.User.username} `}
+                          onCancel={() => setReplyTo(null)}
+                          onSend={(mess) => handleSendComment(mess, comment.id)}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
         <div
           className={
             'justify-content-between mt-4 chapter-nav d-flex border rounded bg-light p-2'

@@ -5,25 +5,9 @@ const jwt = require('jsonwebtoken')
 const upload = require('../utlis/multer')
 const uploadToImgBB = require('../utlis/imgbb')
 const fs = require('fs')
-// const authenticateToken = require('../middleware/authenticateToken')
+const authenticateToken = require('../middleware/authenticateToken')
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret'
-
-// ============================
-// Middleware xác thực JWT
-// ============================
-function authenticateToken(req, res, next) {
-  const authHeader = req.headers['authorization']
-  const token = authHeader && authHeader.split(' ')[1] // Bearer <token>
-
-  if (!token) return res.status(401).json({ error: 'Token không tồn tại' })
-
-  jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ error: 'Token không hợp lệ' })
-    req.user = user
-    next()
-  })
-}
 
 // ============================
 // Đăng ký
@@ -52,6 +36,8 @@ router.post('/register', async (req, res) => {
       username,
       email,
       password_hash,
+      avatar_url:
+        'https://scontent-sin2-2.xx.fbcdn.net/v/t1.30497-1/453178253_471506465671661_2781666950760530985_n.png?stp=dst-png_s200x200&_nc_cat=1&ccb=1-7&_nc_sid=136b72&_nc_eui2=AeGY5-ZpsNOey_c7-29U9g91Wt9TLzuBU1Ba31MvO4FTUOlq_2GlO-T68hCT4Ni_iLwpIsH52d3rp2wUR1p-rnV1&_nc_ohc=2CKwNU0IXg0Q7kNvwHBREsT&_nc_oc=AdnvjRKArtcxP6w3Dc9DyiCWgOY2rQtOxIwX2qE9HpiHp6-Ot6bILOsC4vhTGpRfQsAB-eFTQVRB2Kldj-RuZabP&_nc_zt=24&_nc_ht=scontent-sin2-2.xx&oh=00_AfZ_BT4Z8W-fThCJOAZQoTdZFDXNo72qpU1vo_V3WC0HuA&oe=68FE523A',
     })
 
     // Tạo JWT
@@ -395,6 +381,48 @@ router.get('/bookshelf', authenticateToken, async (req, res) => {
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Lỗi server' })
+  }
+})
+
+// ========================
+// Lấy comment theo user
+// ========================
+router.get('/user/:userId/comment', async (req, res) => {
+  try {
+    const { userId } = req.params
+    const comments = await db.Comment.findAll({
+      where: { user_id: userId },
+      include: [
+        { model: Chapter, attributes: ['id', 'title'] },
+        { model: User, attributes: ['id', 'username', 'avatar_url'] },
+      ],
+      order: [['created_at', 'DESC']],
+    })
+    res.json(comments)
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: 'Lỗi khi lấy comments của user' })
+  }
+})
+
+// ========================
+// Lấy comment bản thân
+// ========================
+router.get('/comment', authenticateToken, async (req, res) => {
+  try {
+    const { userId } = req.user.id
+    const comments = await db.Comment.findAll({
+      where: { user_id: userId },
+      include: [
+        { model: Chapter, attributes: ['id', 'title'] },
+        { model: User, attributes: ['id', 'username', 'avatar_url'] },
+      ],
+      order: [['created_at', 'DESC']],
+    })
+    res.json(comments)
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: 'Lỗi khi lấy comments của user' })
   }
 })
 

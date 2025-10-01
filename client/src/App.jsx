@@ -7,6 +7,9 @@ import Footer from './components/Footer'
 import Login from './components/LoginPopup'
 import Profile from './pages/Profile'
 import Bookshelf from './pages/Bookshelf'
+import AddStory from './pages/AddStory'
+import AddChapter from './pages/AddChapter'
+import Tutorial from './pages/Tutorior'
 import { getProfile } from './services/api'
 import { useEffect } from 'react'
 import { store } from './redux/store'
@@ -40,6 +43,9 @@ function App() {
           <Route path='/login' element={<Login />} />
           <Route path='/profile' element={<Profile />} />
           <Route path='/bookshelf' element={<Bookshelf />} />
+          <Route path='/action' element={<AddStory />} />
+          <Route path='/actions' element={<AddChapter />} />
+          <Route path='/tutorial' element={<Tutorial />} />
         </Routes>
         <Footer />
       </BrowserRouter>

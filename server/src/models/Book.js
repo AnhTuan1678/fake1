@@ -13,6 +13,9 @@ const Book = sequelize.define(
     like: { type: DataTypes.INTEGER, defaultValue: 0 },
     views: { type: DataTypes.INTEGER, defaultValue: 0 },
     followers: { type: DataTypes.INTEGER, defaultValue: 0 },
+    // ⭐
+    review_count: { type: DataTypes.INTEGER, defaultValue: 0 },
+    total_rating: { type: DataTypes.INTEGER, defaultValue: 0 },
     url_avatar: {
       type: DataTypes.STRING,
       defaultValue:
@@ -22,6 +25,7 @@ const Book = sequelize.define(
       type: DataTypes.ARRAY(DataTypes.STRING),
       defaultValue: [],
     },
+
     created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updated_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   },

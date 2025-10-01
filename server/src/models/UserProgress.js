@@ -2,7 +2,6 @@ const { DataTypes } = require('sequelize')
 const sequelize = require('../config/database')
 const User = require('./User')
 const Book = require('./Book')
-const Chapter = require('./Chapter')
 
 const UserProgress = sequelize.define(
   'UserProgress',

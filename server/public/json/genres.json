@@ -1,0 +1,236 @@
+[
+    {
+        "name": "Action",
+        "description": "Thể loại hành động, thường có nội dung về đánh nhau, bạo lực, hỗn loạn, với diễn biến nhanh."
+    },
+    {
+        "name": "Adapted to Anime",
+        "description": "Truyện đã được chuyển thể thành Anime."
+    },
+    {
+        "name": "Adapted to Drama CD",
+        "description": "Truyện đã được chuyển thể thành Drama CD."
+    },
+    {
+        "name": "Adapted to Manga",
+        "description": "Truyện đã được chuyển thể thành Manga."
+    },
+    { "name": "Adult", "description": "Nội dung nhạy cảm." },
+    {
+        "name": "Adventure",
+        "description": "Thể loại phiêu lưu, mạo hiểm, thường là hành trình của các nhân vật."
+    },
+    {
+        "name": "Age Gap",
+        "description": "Trong truyện có thể hiện tình cảm giữa các nhân vật với cách biệt tuổi tác trên 5 năm hoặc hơn."
+    },
+    { "name": "Boys Love", "description": "Truyện có yếu tố đồng tính nam." },
+    {
+        "name": "Character Growth",
+        "description": "Thể loại tập trung vào sự phát triển của nhân vật theo từng giai đoạn."
+    },
+    {
+        "name": "Chinese Novel",
+        "description": "Light Novel được viết bằng tiếng Trung Quốc, bao gồm các truyện có xuất xứ Đại Lục và Đài Loan"
+    },
+    {
+        "name": "Comedy",
+        "description": "Thể loại có các tình tiết gây cười, các xung đột nhẹ nhàng nhưng tạo được tiếng cười nơi độc giả."
+    },
+    {
+        "name": "Cooking",
+        "description": "Những truyện có nội dung liên quan đến việc nấu ăn"
+    },
+    {
+        "name": "Different Social Status",
+        "description": "Nội dung thiên về giải quyết sự khác biệt giữa các giai cấp, giai tầng xã hội."
+    },
+    {
+        "name": "Drama",
+        "description": "Thể loại kịch tính, mang đến cho người xem những cảm xúc khác nhau: buồn bã, căng thẳng thậm chí là bi phẫn."
+    },
+    {
+        "name": "Ecchi",
+        "description": "Thể loại có những tình huống nhạy cảm nhằm lôi cuốn người xem."
+    },
+    {
+        "name": "English Novel",
+        "description": "Các truyện được viết bằng tiếng Anh."
+    },
+    {
+        "name": "Fanfiction",
+        "description": "Thể loại truyện giả tưởng vay mượn nhân vật/bối cảnh của một hoặc nhiều truyện nguyên tác khác. Fanfiction trên Hako phải là những bộ chất lượng và nổi tiếng."
+    },
+    {
+        "name": "Fantasy",
+        "description": "Thể loại xuất phát từ trí tưởng tượng phong phú, từ pháp thuật đến thế giới trong mơ thậm chí là những câu chuyện thần tiên."
+    },
+    {
+        "name": "Female Protagonist",
+        "description": "Truyện có nhân vật chính là nữ."
+    },
+    {
+        "name": "Game",
+        "description": "Thể loại có nội dung xoay quanh các trò chơi hay lấy ý tưởng hoặc phỏng theo trò chơi."
+    },
+    {
+        "name": "Gender Bender",
+        "description": "Là một thể loại trong đó giới tính của nhân vật bị lẫn lộn: nam hoá thành nữ, nữ hóa thành nam..."
+    },
+    {
+        "name": "Harem",
+        "description": "Thể loại truyện tình cảm, lãng mạn mà trong đó, nhiều nhân vật thích một nhân vật chính"
+    },
+    {
+        "name": "Historical",
+        "description": "Thể loại truyện lấy cảm hứng từ các sự kiện lịch sử hoặc cốt truyện gắn liền với các sự kiện lịch sử với dòng thời gian đóng vai trò quan trọng."
+    },
+    {
+        "name": "Horror",
+        "description": "Thể loại rùng rợn, làm cho bạn kinh hãi, khiếp sợ, ghê tởm, run rẩy, có thể gây shock - một thể loại không dành cho người yếu tim."
+    },
+    {
+        "name": "Incest",
+        "description": "Truyện đề cập đến tình yêu giữa các thành viên trong gia đình"
+    },
+    {
+        "name": "Isekai",
+        "description": "Mang ý nghĩa \"thế giới khác\". Đối với thể loại này, nhân vật chính thường sống lại (trọng sinh) về quá khứ, chuyển sinh đến thế giới khác, hoặc bị triệu hồi .... Nói tóm lại là đến một thế giới khác."
+    },
+    {
+        "name": "Josei",
+        "description": "Là thể loại được sáng tác chủ yếu bởi phụ nữ cho những độc giả nữ từ 18 đến 30. Josei có thể miêu tả những cảnh lãng mạn thực tế, có cốt truyện rõ ràng, chín chắn trái ngược với hầu hết các kiểu lãng mạn lí tưởng trong truyện Shoujo."
+    },
+    {
+        "name": "Korean Novel",
+        "description": "Light Novel theo phong cách Hàn Quốc"
+    },
+    {
+        "name": "Magic",
+        "description": "Truyện có các yếu tố liên quan đến ma thuật như phù phép, bùa chú."
+    },
+    {
+        "name": "Martial Arts",
+        "description": "Truyện có liên quan đến võ thuật, bao gồm cả các môn võ đối kháng thực tế lẫn hư cấu (như quyền thuật hay kiếm thuật)"
+    },
+    {
+        "name": "Mature",
+        "description": "Truyện có những yếu tố dành cho người trưởng thành (trên 18 tuổi)"
+    },
+    {
+        "name": "Mecha",
+        "description": "Thể loại nói tới những robot hoặc máy móc, thường là những cỗ máy biết đi do phi công cầm lái."
+    },
+    {
+        "name": "Military",
+        "description": "Thể loại liên quan đến quân sự, thường đi kèm với chiến tranh hoặc lịch sử."
+    },
+    {
+        "name": "Misunderstanding",
+        "description": "Nội dung xoay quanh sự hiểu nhầm giữa các nhân vật"
+    },
+    {
+        "name": "Mystery",
+        "description": "Thể loại bí ẩn, thường xuất hiện những điều bí ẩn không thể lí giải được và sau đó là những nỗ lực của nhân vật chính nhằm tìm ra câu trả lời thỏa đáng."
+    },
+    {
+        "name": "Netorare",
+        "description": "Netorare là thể loại mà vợ hoặc người yêu của nhân vật chính bị người khác chiếm đoạt."
+    },
+    {
+        "name": "One shot",
+        "description": "Những truyện ngắn, thường kết thúc trong 1 chương hay 1 tập duy nhất."
+    },
+    {
+        "name": "Otome Game",
+        "description": "Loại truyện mà nhân vật đầu thai vào thế giới game dành cho nữ (còn gọi là Otome Game)"
+    },
+    {
+        "name": "Parody",
+        "description": "Bắt chước / sao chép lại văn phong, nhân vật; hoặc viết nội dung mới... dựa trên một hoặc nhiều tác phẩm gốc khác."
+    },
+    {
+        "name": "Psychological",
+        "description": "Thể loại liên quan đến những vấn đề về tâm lý của nhân vật (tâm thần bất ổn, điên cuồng ...)"
+    },
+    {
+        "name": "Reverse Harem",
+        "description": "Tương tự Harem nhưng nhân vật chính là nữ"
+    },
+    {
+        "name": "Romance",
+        "description": "Thể loại đề cập đến chuyện tình cảm lãng mạn, thường là tình yêu giữa hai phái."
+    },
+    {
+        "name": "School Life",
+        "description": "Thể loại học đường, ngữ cảnh diễn biến câu chuyện chủ yếu ở trường học."
+    },
+    {
+        "name": "Science Fiction",
+        "description": "Bao gồm những chuyện khoa học viễn tưởng, đa phần chúng xoay quanh nhiều hiện tượng liên quan tới khoa học, công nghệ, tuy vậy thường thì những câu chuyện đó không gắn bó chặt chẽ với các thành tựu khoa học hiện thời, mà là do con người tưởng tượng ra."
+    },
+    {
+        "name": "Seinen",
+        "description": "Thể loại dành cho lứa tuổi thanh niên (18-30 tuổi) nhưng thường phù hợp cho cả độ tuổi lớn hơn. Truyện thuộc thể loại này có thể có những tình tiết bạo lực và khiêu dâm."
+    },
+    {
+        "name": "Shoujo",
+        "description": "Đối tượng hướng tới của thể loại này là phái nữ. Nội dung thường liên quan đến tình cảm lãng mạn."
+    },
+    {
+        "name": "Shoujo ai",
+        "description": "Thể loại quan hệ hoặc liên quan tới đồng tính nữ, thể hiện trong các mối quan hệ trên mức bình thường giữa các nhân vật nữ."
+    },
+    {
+        "name": "Shounen",
+        "description": "Thể loại hướng tới đối tượng độc giả là nam thanh niên."
+    },
+    {
+        "name": "Shounen ai",
+        "description": "Thể loại có nội dung về tình yêu giữa những chàng trai trẻ, mang tính chất lãng mạn nhưng ít đề cập đến quan hệ tình dục."
+    },
+    {
+        "name": "Slice of Life",
+        "description": "Thể loại nói về cuộc sống đời thường."
+    },
+    {
+        "name": "Slow Life",
+        "description": "Truyện chủ yếu nói về việc nhân vật tận hưởng cuộc sống nhàn nhã, ít có yếu tố gay cấn."
+    },
+    {
+        "name": "Sports",
+        "description": "Đúng như tên gọi, những môn thể thao như bóng đá, bóng chày, bóng chuyền, đua xe, cầu lông,... là một phần của thể loại này."
+    },
+    {
+        "name": "Super Power",
+        "description": "Thể loại mà các nhân vật thường sở hữu siêu năng lực hay các kỹ năng siêu phàm."
+    },
+    {
+        "name": "Supernatural",
+        "description": "Thể loại siêu nhiên sẽ xuất hiện những sức mạnh đáng kinh ngạc và không thể giải thích được, chúng thường đi kèm với những sự kiện trái ngược hoặc thách thức với định luật vật lý."
+    },
+    {
+        "name": "Suspense",
+        "description": "Thường có những tình tiết, diễn biến kịch tính tạo sự hồi hộp cho độc giả."
+    },
+    {
+        "name": "Tragedy",
+        "description": "Thể loại bi kịch, chứa đựng những sự kiện dẫn đến kết cục là những mất mát hay sự rủi ro to lớn."
+    },
+    {
+        "name": "Wars",
+        "description": "Thể loại truyện có mô tả chi tiết về chiến tranh, chiến trận."
+    },
+    {
+        "name": "Web Novel",
+        "description": "Những truyện được viết trên blog cá nhân, không chính thức được xuất bản."
+    },
+    {
+        "name": "Workplace",
+        "description": "Truyện có mô tả chi tiết về các công việc và vấn đề trong công sở."
+    },
+    {
+        "name": "Yuri",
+        "description": "Thể loại về đồng tính nữ, có thể có cảnh sex."
+    }
+]

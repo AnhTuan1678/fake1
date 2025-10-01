@@ -16,6 +16,8 @@ export const formatterStoryDetail = (book) => {
     genres: book.genres || [],
     publishedDate: book.created_at,
     updatedDate: book.updated_at,
+    reviewCount: book.review_count,
+    totalRating: book.total_rating,
   }
 }
 
