@@ -23,13 +23,13 @@ app.use('/public', express.static(publicPath))
 // =====================
 // PHỤC VỤ FRONTEND VITE BUILD
 // =====================
-// const clientBuildPath = path.join(__dirname, './dist');
-// app.use(express.static(clientBuildPath));
+const clientBuildPath = path.join(__dirname, './dist');
+app.use(express.static(clientBuildPath));
 
 // Bắt tất cả route còn lại trả về index.html để React Router xử lý
-// app.get(/^\/.*$/, (req, res) => {
-//   res.sendFile(path.join(clientBuildPath, 'index.html'))
-// })
+app.get(/^\/.*$/, (req, res) => {
+  res.sendFile(path.join(clientBuildPath, 'index.html'))
+})
 
 
 app.listen(PORT, HOST, () => {
