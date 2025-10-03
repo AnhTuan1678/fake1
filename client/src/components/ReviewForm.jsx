@@ -2,6 +2,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faStar as faStarSolid } from '@fortawesome/free-solid-svg-icons'
 import { useRef, useState, useEffect } from 'react'
 import { CommentItem } from './CommentItem'
+import {
+  getReviewsByBook,
+  createReview,
+  updateReview,
+  deleteReview,
+} from '../services/api'
+import { useSelector } from 'react-redux'
+import { useSnackbar } from '../context/SnackbarContext'
 
 const StarSelector = ({ rating, setRating, totalStars = 5, fixed = false }) => {
   return (
@@ -28,19 +36,15 @@ const StarSelector = ({ rating, setRating, totalStars = 5, fixed = false }) => {
 }
 
 // Component ReviewForm
-export function ReviewForm({
-  myReview = {}, // object hoặc null
-  handleAddReview = async () => {},
-  handleSaveReview = async () => {},
-  handleDeletePreview,
-  isEditing = false,
-}) {
-  const [newReview, setNewReview] = useState(myReview.content || '')
-  const [rating, setRating] = useState(myReview.rating || 5)
-  const [editing, setEditing] = useState(isEditing)
-  const [review, setReview] = useState(myReview)
+export function ReviewForm({ bookId }) {
+  const [newReview, setNewReview] = useState('')
+  const [rating, setRating] = useState(5)
+  const [editing, setEditing] = useState(false)
+  const [review, setReview] = useState(null)
 
   const textareaRef = useRef(null)
+  const { showSnackbar } = useSnackbar()
+  const user = useSelector((state) => state.user)
 
   useEffect(() => {
     if (editing && textareaRef.current) {
@@ -50,21 +54,62 @@ export function ReviewForm({
     }
   }, [editing])
 
+  useEffect(() => {
+    const fetchReview = async () => {
+      const review = await getReviewsByBook(bookId)
+      const r = review.find((c) => c.user_id === user.id) || null
+      setReview(r)
+      if (r) {
+        setRating(r.rating)
+        setNewReview(r.content)
+      } else {
+        setRating(5)
+        setNewReview('')
+      }
+    }
+    fetchReview()
+  }, [bookId, user.id])
+
+  const handleAddReview = async ({ content = '', rating }) => {
+    if (!content.trim()) return
+    if (!user.isLoggedIn) {
+      showSnackbar({ message: 'Chưa đăng nhập', status: 'warning' })
+      return
+    }
+    const res = await createReview(user.token, bookId, content, rating)
+    res.User = { ...user, avatar_url: user.avatarUrl }
+    return res
+  }
+
+  const handleSaveReview = async ({ content, rating, reviewId }) => {
+    if (!content.trim()) return
+    if (!user.isLoggedIn) {
+      showSnackbar({ message: 'Chưa đăng nhập', status: 'warning' })
+      return
+    }
+    const res = await updateReview(user.token, reviewId, content, rating)
+    res.User = { ...user, avatar_url: user.avatarUrl }
+    return res
+  }
+
+  const handleDeletePreview = async (id) => {
+    if (!id) return
+    const res = await deleteReview(user.token, id)
+    showSnackbar(res)
+  }
+
   return (
     <div className='mb-4'>
       {review && !editing ? (
         // Hiển thị bình luận hiện có
-        <div className='mb-4 border p-3 shadow rounded-3'>
-          <div className='mb-2'>
-            <strong>Bạn đã đánh giá:</strong>
-          </div>
+        <div className='mb-4 border p-1 p-md-3 rounded-3'>
           <StarSelector
             rating={review.rating}
             setRating={setRating}
             fixed={!editing}
           />
           <CommentItem comment={review} />
-          <div>
+          <div className='pt-2 ps-5'>
             <button
               className='btn btn-sm btn-outline-primary me-2'
               onClick={() => {

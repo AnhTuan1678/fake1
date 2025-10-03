@@ -1,21 +1,8 @@
-.card-body {
-    padding: 5px !important;
-}
-
 .card-title {
     font-size: 12px;
 }
 
-.story-card {
-    cursor: pointer;
-}
-
-.story-card:hover {
-    transform: scale(1.03);
-}
-
 .story-info-popup {
-    max-width: 500px;
     z-index: 1050;
 }
 
@@ -33,7 +20,6 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
-
     white-space: pre-line;
 }
 

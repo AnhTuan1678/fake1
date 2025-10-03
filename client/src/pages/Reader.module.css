@@ -1,3 +1,11 @@
-.img{
+h2 {
+    font-family: OpenSans, sans-serif;
+}
+
+p{
+    font-family: Times New Roman,Georgia,serif;
+}
+
+.img {
     width: 100%;
 }

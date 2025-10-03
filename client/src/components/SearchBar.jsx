@@ -5,7 +5,7 @@ import styles from './SearchBar.module.css'
 import { searchBooks } from '../services/api'
 import { useNavigate } from 'react-router-dom'
 
-const SearchBar = ({ className, onSearch }) => {
+const SearchBar = ({ className = '' }) => {
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState(query)
   const [results, setResults] = useState([])
@@ -21,7 +21,6 @@ const SearchBar = ({ className, onSearch }) => {
     return () => clearTimeout(handler)
   }, [query])
 
-  // Gọi API
   useEffect(() => {
     if (!debouncedQuery.trim()) {
       setResults([])
@@ -33,12 +32,11 @@ const SearchBar = ({ className, onSearch }) => {
       const data = await searchBooks(debouncedQuery)
       setResults(data)
       setShowDropdown(true)
-      if (onSearch) onSearch(data)
       setHighlightedIndex(-1) // reset highlight khi search mới
     }
 
     fetchData()
-  }, [debouncedQuery, onSearch])
+  }, [debouncedQuery])
 
   // Click ngoài để đóng dropdown
   useEffect(() => {
@@ -55,7 +53,6 @@ const SearchBar = ({ className, onSearch }) => {
   const handleSelect = (book) => {
     setQuery('')
     setShowDropdown(false)
-    if (onSearch) onSearch([book])
     navigate(`/story/${book.id}`)
   }
 
@@ -78,54 +75,79 @@ const SearchBar = ({ className, onSearch }) => {
   }
 
   return (
-    <div className={`${styles.wrapper} ${className}`} ref={wrapperRef}>
+    <div
+      className={`${className} align-items-center dropdown ${styles['search-bar']}`}
+      style={
+        showDropdown && results.length > 0
+          ? {
+              borderTopLeftRadius: '12px',
+              borderTopRightRadius: '12px',
+            }
+          : { borderRadius: '12px' }
+      }
+      ref={wrapperRef}>
       <form
-        className={styles['search-bar']}
+        className={`d-flex align-items-center w-100 rounded-pill overflow-hidden rounded-t-3 p-1 pb-0`}
         onSubmit={(e) => e.preventDefault()}>
         <input
           type='text'
-          className={styles['search-input']}
-          placeholder='Tìm kiếm...'
+          className={`${styles['search-input']} flex-grow-1 border-0 ps-2`}
+          placeholder='Nhập ít nhất 2 kí tự'
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown} // <-- thêm
         />
-        <button type='submit' className={styles['search-btn']}>
+        <button type='submit' className={`${styles['search-btn']} border-0`}>
           <div className={styles.icon}>
             <FontAwesomeIcon icon={faSearch} />
           </div>
         </button>
       </form>
 
-      {showDropdown && results.length > 0 && (
-        <ul className={styles['dropdown']}>
-          {results.map((book, index) => (
-            <li
-              key={book.id}
-              className={`${styles['dropdown-item']} ${
-                index === highlightedIndex ? styles.highlighted : ''
-              }`}
-              onClick={() => handleSelect(book)}
-              onMouseEnter={() => setHighlightedIndex(index)}>
-              <img
-                src={book.url_avatar}
-                alt={book.title}
-                className={styles['book-cover']}
-              />
-              <div className={styles['book-info']}>
-                <div className={styles['book-title']}>{book.title}</div>
-                <div className={styles['book-author']}>
-                  Tác giả: {book.author}
+      <div
+        className='position-absolute rounded-b-3 start-0 end-0 p-0 m-0 overflow-hidden'
+        style={{
+          backgroundColor: 'inherit',
+          borderBottomLeftRadius: '12px',
+          borderBottomRightRadius: '12px',
+        }}>
+        {showDropdown && results.length > 0 && (
+          <ul className='show p-0 overflow-hidden m-0'>
+            {results.map((book, index) => (
+              <li
+                key={book.id}
+                className={`${styles['dropdown-item']} ${
+                  index === highlightedIndex ? styles.highlighted : ''
+                } d-flex align-items-center gap-2 p-1 cursor-pointer border-bottom`}
+                onClick={() => handleSelect(book)}
+                onMouseEnter={() => setHighlightedIndex(index)}>
+                <img
+                  src={book.url_avatar}
+                  alt={book.title}
+                  className={`${styles['book-cover']} flex-shrink-0 object-fit-cover`}
+                />
+                <div className={`d-flex flex-column overflow-hidden`}>
+                  <div
+                    className={`${styles['book-title']} fw-bold fs-6 mb-1 overflow-hidden text-nowrap`}>
+                    {book.title}
+                  </div>
+                  <div className={styles['book-author']}>
+                    Tác giả: {book.author}
+                  </div>
+                  <div className={styles['book-meta']}>
+                    <span className='text-nowrap'>
+                      Cập nhật: {book.updatedAt}
+                    </span>
+                    <span className='text-nowrap'>
+                      Số chương: {book.chapterCount}
+                    </span>
+                  </div>
                 </div>
-                <div className={styles['book-meta']}>
-                  <span>Cập nhật: {book.updatedAt}</span>
-                  <span>Số chương: {book.chapterCount}</span>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   )
 }

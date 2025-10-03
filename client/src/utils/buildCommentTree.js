@@ -8,7 +8,7 @@ export const buildCommentTree = (comments) => {
 
   comments.forEach((c) => {
     if (c.parent_id) {
-      map[c.parent_id]?.replies.push(map[c.id])
+      map[c.parent_id]?.replies.unshift(map[c.id])
     } else {
       roots.push(map[c.id])
     }

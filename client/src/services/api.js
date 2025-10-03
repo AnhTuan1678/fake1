@@ -1,4 +1,4 @@
-const API_URL = 'https://nadark.onrender.com'
+const API_URL = `https://nadark.onrender.com`
 
 import { formatterStoryDetail } from '../utils/formatter'
 import { cacheFetch } from './cacheFetch'
@@ -24,9 +24,32 @@ export const register = async (username, email, password) => {
   return await res.json()
 }
 
+export const changePassword = async (token, oldPassword, newPassword) => {
+  try {
+    const res = await fetch(`${API_URL}/api/account/change-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ oldPassword, newPassword }),
+    })
+
+    if (!res.ok) {
+      const errData = await res.json()
+      throw new Error(errData.error || 'Đổi mật khẩu thất bại')
+    }
+
+    return await res.json()
+  } catch (err) {
+    console.error('changePassword error:', err)
+    return { error: err.message }
+  }
+}
+
 export const getProfile = async (token) => {
   try {
-    const res = await cacheFetch(`${API_URL}/api/account/me`, {
+    const res = await fetch(`${API_URL}/api/account/me`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -37,6 +60,29 @@ export const getProfile = async (token) => {
   } catch (err) {
     console.error('Lỗi khi gọi getProfile:', err)
     return { error: 'Không thể kết nối server' }
+  }
+}
+
+export const getUserProgress = async (token) => {
+  try {
+    const res = await fetch(`${API_URL}/api/account/progress`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    if (!res.ok) {
+      const errData = await res.json()
+      throw new Error(errData.error || 'Lấy tiến trình thất bại')
+    }
+
+    const data = await res.json()
+    return data
+  } catch (err) {
+    console.error('getUserProgress error:', err)
+    return []
   }
 }
 
@@ -352,7 +398,8 @@ export const createComment = async (
 
 // Xoá comment
 export const deleteComment = async (token, commentId) => {
-  const res = await fetch(`${API_URL}/api/comment/${commentId}`, {
+  console.log(`${API_URL}/api/chapter/comment/${commentId}`)
+  const res = await fetch(`${API_URL}/api/chapter/comment/${commentId}`, {
     method: 'DELETE',
     headers: {
       Authorization: `Bearer ${token}`,

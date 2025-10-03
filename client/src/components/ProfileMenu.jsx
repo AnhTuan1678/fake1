@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styles from './ProfileMenu.module.css'
 import LoginPopup from './LoginPopup'
-import Snackbar from './SnackBar'
 import { useSelector, useDispatch } from 'react-redux'
+import { useSnackbar } from '../context/SnackbarContext'
 import { logout } from '../redux/userSlice'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
@@ -13,133 +13,143 @@ import {
   faSignOut,
   faSignIn,
   faTrash,
+  faUserPlus,
 } from '@fortawesome/free-solid-svg-icons'
 import { clearCache } from '../services/cacheFetch'
+import nova from '../assets/nova.png' // avatar mặc định
 
 const ProfileMenu = ({ className }) => {
+  const [authPopup, setAuthPopup] = useState({
+    show: false,
+    activeTab: 'login',
+  })
+  const isLoggedIn = useSelector((state) => state.user.isLoggedIn)
+
   const [isOpen, setIsOpen] = useState(false)
   const [closing, setClosing] = useState(false)
-  const [showLogin, setShowLogin] = useState(false)
-  const [snack, setSnack] = useState(false)
 
-  const { avatarUrl, isLoggedIn, username } = useSelector((state) => state.user)
+  const user = useSelector((state) => state.user)
   const dispatch = useDispatch()
 
   const navigate = useNavigate()
+  const { showSnackbar } = useSnackbar()
 
   const handleLogout = () => {
     dispatch(logout())
     localStorage.removeItem('token')
   }
 
-  const toggleMenu = () => {
-    setIsOpen(!isOpen)
-  }
-  const closeMenu = () => {
+  const onOpen = () => setIsOpen(!isOpen)
+  const onClose = () => {
     setClosing(true)
     setTimeout(() => {
       setIsOpen(false)
       setClosing(false)
-    }, 300)
+    }, 200)
   }
 
-  const DropMenu = () => {
-    return (
-      <>
+  return (
+    <div className={`${className} d-flex`}>
+      <div className='flex-grow-1'></div>
+      <div className='dropdown' onClick={onOpen}>
+        <img
+          className={`${styles.avatar} dropdown-toggle`}
+          src={isLoggedIn ? user.avatarUrl : nova}
+          alt={isLoggedIn ? user.username : 'Guest'}
+        />
         <div
-          className={`${styles.dropdownOverlay} animate__animated ${
-            isOpen ? 'show animate__fadeIn' : 'd-none'
-          } ${styles.backdrop}`}
-          onClick={closeMenu}></div>
+          className={`cus-overlay animate__animated animate__faster ${
+            isOpen
+              ? 'show animate__fadeIn'
+              : closing
+              ? 'show animate__fadeOut'
+              : 'd-none'
+          }`}
+          onClick={onClose}></div>
+
         <div
-          className={`dropdown-menu animate__animated animate__faster ${
+          className={`dropdown-menu p-0 animate__animated animate__faster ${
             isOpen
               ? 'show animate__fadeInDown'
               : closing
               ? 'animate__fadeOutUp show'
               : ''
           } ${styles.dropdownMenu}`}>
-          <button
-            className={`dropdown-item ${styles.dropdownItem}`}
-            onClick={() => {
-              // Handle profile click
-              navigate('/profile')
-            }}>
-            <FontAwesomeIcon icon={faUser} />
-            Tài khoản
-          </button>
-          <button
-            className={`dropdown-item ${styles.dropdownItem}`}
-            onClick={() => {
-              // Handle profile click
-              navigate('/bookshelf')
-            }}>
-            <FontAwesomeIcon icon={faBookmark} />
-            Đánh dấu
-          </button>
-          <button
-            className={`dropdown-item ${styles.dropdownItem}`}
-            onClick={() => {
-              // Handle settings click
-              navigate('/settings')
-            }}>
-            <FontAwesomeIcon icon={faCog} />
-            Cài đặt
-          </button>
-          <button
-            className={`dropdown-item ${styles.dropdownItem} text-danger hover-bg-danger`}
-            onClick={async () => {
-              clearCache()
-              console.log('Đã xoá cache')
-              setSnack('Đã xoá cache')
-            }}>
-            <FontAwesomeIcon icon={faTrash} />
-            Xóa cache
-          </button>
-          <div className={`dropdown-divider ${styles.dropdownDivider}`}></div>
-          <button
-            className={`dropdown-item ${styles.dropdownItem}`}
-            onClick={handleLogout}>
-            <FontAwesomeIcon icon={faSignOut} />
-            Đăng xuất
-          </button>
+          {isLoggedIn ? (
+            <>
+              <button
+                className={`dropdown-item ${styles.dropdownItem}`}
+                onClick={() => navigate('/profile')}>
+                <FontAwesomeIcon icon={faUser} />
+                Tài khoản
+              </button>
+              <button
+                className={`dropdown-item ${styles.dropdownItem}`}
+                onClick={() => navigate('/bookshelf')}>
+                <FontAwesomeIcon icon={faBookmark} />
+                Đánh dấu
+              </button>
+              <button
+                className={`dropdown-item ${styles.dropdownItem}`}
+                onClick={() => navigate('/settings')}>
+                <FontAwesomeIcon icon={faCog} />
+                Cài đặt
+              </button>
+              <button
+                className={`dropdown-item ${styles.dropdownItem} text-danger hover-bg-danger`}
+                onClick={() => {
+                  clearCache()
+                  showSnackbar({ message: 'Đã xoá cache' })
+                }}>
+                <FontAwesomeIcon icon={faTrash} />
+                Xóa cache
+              </button>
+              <div
+                className={`dropdown-divider ${styles.dropdownDivider}`}></div>
+              <button
+                className={`dropdown-item ${styles.dropdownItem}`}
+                onClick={handleLogout}>
+                <FontAwesomeIcon icon={faSignOut} />
+                Đăng xuất
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                className={`dropdown-item ${styles.dropdownItem}`}
+                onClick={() =>
+                  setAuthPopup({ show: true, activeTab: 'login' })
+                }>
+                <FontAwesomeIcon icon={faSignIn} />
+                Đăng nhập
+              </button>
+              <button
+                className={`dropdown-item ${styles.dropdownItem}`}
+                onClick={() =>
+                  setAuthPopup({ show: true, activeTab: 'register' })
+                }>
+                <FontAwesomeIcon icon={faUserPlus} />
+                Đăng ký
+              </button>
+              <button
+                className={`dropdown-item ${styles.dropdownItem} text-danger hover-bg-danger`}
+                onClick={() => {
+                  clearCache()
+                  showSnackbar({ message: 'Đã xoá cache' })
+                }}>
+                <FontAwesomeIcon icon={faTrash} />
+                Xóa cache
+              </button>
+            </>
+          )}
         </div>
-        {snack && <Snackbar message={snack} onClose={() => setSnack(null)} />}
-      </>
-    )
-  }
-
-  return (
-    <div className={`${className} d-flex`}>
-      <div className='flex-grow-1'></div>
-      {isLoggedIn ? (
-        <div
-          className={`cursor-pointer ${styles.dropdownContainer}`}
-          onClick={toggleMenu}>
-          <img
-            className={styles.avatar}
-            src={avatarUrl}
-            alt={username}
-          />
-          <DropMenu />
-        </div>
-      ) : (
-        <div
-          className={`${styles.avatar} align-items-center justify-content-center position-relative`}>
-          <button
-            className={`btn btn-link ${styles.login} position-absolute top-50 translate-middle p-1`}
-            onClick={() => setShowLogin(true)}>
-            <FontAwesomeIcon icon={faSignIn} />
-            Đăng nhập
-          </button>
-        </div>
+      </div>
+      {authPopup.show && (
+        <LoginPopup
+          activeTab={authPopup.activeTab}
+          onClose={() => setAuthPopup(false)}
+        />
       )}
-      <LoginPopup
-        isOpen={showLogin}
-        onClose={() => {
-          setShowLogin(false)
-        }}
-      />
     </div>
   )
 }

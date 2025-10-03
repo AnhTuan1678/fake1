@@ -33,6 +33,16 @@
     --color-info: #0dcaf0;
 
     --color-cus-1: #dfdfdf;
+
+    /* ----------------------------------------- */
+    --color-bg-input: #e0e0e0; /* màu nền input */
+    --color-text-input: #6b6b6b; /* màu chữ input */
+    --color-input-icon: #444444; /* màu icon */
+    --color-body-background: #f7f7f8;
+    --color-header-background: #f6f7f8;
+    --color-container-background: #fefefe;
+    --color-comment-background: #f3f4f6;
+    --color-chapter-background: #eae4d3;
 }
 
 * {
@@ -42,11 +52,18 @@
     font-family: Arial, sans-serif;
 }
 
+body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: var(--color-body-background);
+    background-size: cover;
+}
+
 .app {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    background-color: var(--color-bg-content);
+    /* background-color: var(--color-bg-content); */
     color: var(--color-text-dark);
 }
 
@@ -57,7 +74,15 @@
 }
 
 .container {
-    max-width: 1000px;
+    max-width: 1100px;
+}
+
+.cus-container {
+    background-color: var(--color-container-background);
+}
+
+.cus-comment {
+    background-color: var(--color-comment-background);
 }
 
 .footer {
@@ -73,7 +98,8 @@
     color: var(--color-text-light);
 }
 
-.btn-primary:hover {
+.btn-primary:hover,
+.btn-primary:active {
     background-color: var(--color-bg-badge-hover);
     border-color: var(--color-bg-badge-hover);
     color: var(--color-bg-content);
@@ -96,7 +122,8 @@
 
 /* Overlay mờ nền */
 .cus-overlay {
-    position: fixed;
+    cursor: auto;
+    position: fixed !important;
     top: 0;
     left: 0;
     right: 0;
@@ -108,13 +135,21 @@
     z-index: 999;
 }
 
-.tippy-box{
+.opacity-hover-50:hover {
+    opacity: 0.5;
+}
+
+.tippy-box {
     background-color: white;
     color: black;
     border-radius: 8px;
 }
 
-.tippy-content{
+.tippy-content {
     max-width: 50vw;
     padding: 8px;
+}
+
+.fs-7 {
+    font-size: 0.875rem;
 }

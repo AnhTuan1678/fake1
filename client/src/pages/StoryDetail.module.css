@@ -52,14 +52,9 @@
     border: 1px solid #fdcb6e;
 }
 
-.cus-btn {
-    background: var(--color-bg-badge-hover) !important;
-}
-
-.cus-btn:hover {
-    color: var(--color-bg-content) !important;
-    background: var(--color-bg-nav) !important;
-}
+/* .cus-btn:hover {
+    opacity: 50%;
+} */
 
 .btn-yellow {
     background-color: #f1c40f; /* màu vàng */

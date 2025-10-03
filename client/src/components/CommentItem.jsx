@@ -9,9 +9,7 @@ export const CommentItem = ({ comment }) => {
         height={40}
       />
 
-      <div
-        className='rounded p-2 w-100 position-relative'
-        style={{ backgroundColor: 'var(--color-cus-1)' }}>
+      <div className='rounded p-2 w-100 position-relative cus-comment'>
         {/* Rating góc trên bên phải */}
         {comment.rating != null && (
           <div
@@ -35,7 +33,9 @@ export const CommentItem = ({ comment }) => {
         )}
 
         <p className='mb-1 ms-1 fw-bold'>{comment?.User?.username}</p>
-        <p className='mb-0 ms-1'>{comment.content}</p>
+        <p className='mb-0 ms-1' style={{ whiteSpace: 'pre-wrap' }}>
+          {comment.content}
+        </p>
       </div>
     </div>
   )

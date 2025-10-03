@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   getChapterContent,
   getStoryDetails,
@@ -7,6 +7,7 @@ import {
   updateSettings,
   getProfile,
   createComment,
+  deleteComment,
   getCommentsByChapter,
 } from '../services/api'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -22,6 +23,7 @@ import {
   faSave,
   faRefresh,
   faComment,
+  faTrash,
 } from '@fortawesome/free-solid-svg-icons'
 import TableOfContents from '../components/TableOfContents'
 import { CommentItem } from '../components/CommentItem'
@@ -29,19 +31,20 @@ import { CommentBox } from '../components/CommentBox'
 import { useSelector } from 'react-redux'
 import { buildCommentTree } from '../utils/buildCommentTree'
 import { timeAgo } from '../utils/timeAgo'
+import { useSnackbar } from '../context/SnackbarContext'
 
 const Reader = () => {
   const defaultSetting = {
-    fontSize: '20px',
-    fontFamily: 'Arial',
+    fontSize: '18px',
+    fontFamily: 'Times New Roman',
     lineHeight: 1.5,
     zoom: 1,
   }
 
   const { chapterIndex, id } = useParams(1)
   const navigate = useNavigate()
-
   const currentUser = useSelector((state) => state.user)
+  const { showSnackbar } = useSnackbar()
 
   const [content, setContent] = useState('')
   const [storyDetails, setStoryDetails] = useState({})
@@ -50,6 +53,9 @@ const Reader = () => {
   const [showTOC, setShowTOC] = useState(false)
   const [comments, setComments] = useState([])
   const [replyTo, setReplyTo] = useState(null)
+
+  const [showNav, setShowNav] = useState(true)
+  const contentRef = useRef(null)
 
   // Lấy nội dung chương
   useEffect(() => {
@@ -62,17 +68,16 @@ const Reader = () => {
     }
 
     // Lưu tiến trình đọc khi load chương
-    const token = localStorage.getItem('token')
-    if (token) {
+    if (currentUser.token) {
       try {
-        saveProgress(token, id, chapterIndex, 0)
+        saveProgress(currentUser.token, id, chapterIndex, 0)
       } catch (err) {
         console.error('Lỗi khi lưu tiến trình:', err)
       }
     }
 
     fetchContent()
-  }, [chapterIndex, id])
+  }, [chapterIndex, id, currentUser.token])
 
   // Lấy thông tin sách
   useEffect(() => {
@@ -87,7 +92,7 @@ const Reader = () => {
   // Lấy setting
   useEffect(() => {
     const fetchUserSettings = async () => {
-      const token = localStorage.getItem('token')
+      const token = currentUser.token
       if (token) {
         const profile = await getProfile(token)
         if (profile.personal_settings) {
@@ -105,6 +110,39 @@ const Reader = () => {
     }
 
     fetchUserSettings()
+  }, [currentUser.token])
+
+  // Đổi màu body
+  useEffect(() => {
+    const prevColor = document.body.style.backgroundColor
+    document.body.style.backgroundColor = 'var(--color-chapter-background)'
+    return () => {
+      document.body.style.backgroundColor = prevColor
+    }
+  }, [])
+
+  // Tính toán việc hiển thị thanh nav trên điện thoại
+  // Nếu scroll gần hết content => ẩn
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!contentRef.current) return
+
+      const rect = contentRef.current.getBoundingClientRect()
+      const windowHeight = window.innerHeight
+
+      // rect.bottom là khoảng cách từ top viewport tới bottom content
+      if (rect.bottom - windowHeight < 50) {
+        // Gần cuối content → ẩn
+        setShowNav(false)
+      } else {
+        // Ở giữa → hiện
+        setShowNav(true)
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    handleScroll() // kiểm tra khi mount
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   // Lưu setting
@@ -113,7 +151,7 @@ const Reader = () => {
     setShowSettings(false)
 
     // Lưu lên server
-    const token = localStorage.getItem('token')
+    const token = currentUser.token
     if (token) {
       try {
         await updateSettings(token, setting)
@@ -135,7 +173,7 @@ const Reader = () => {
     setSetting(defaultSetting)
 
     // Lưu lên server
-    const token = localStorage.getItem('token')
+    const token = currentUser.token
     if (token) {
       try {
         await updateSettings(token, setting)
@@ -146,19 +184,30 @@ const Reader = () => {
     }
   }
 
-  const handleReply = (commentId) => {
-    setReplyTo(commentId)
-  }
-
   const handleSendComment = async (message, parentId = null) => {
     if (!message || !message.trim()) return
 
-    const token = localStorage.getItem('token')
+    const token = currentUser.token
     const res = await createComment(token, content.id, message, parentId)
     res.User = { ...currentUser, avatar_url: currentUser.avatarUrl }
 
     setComments([res, ...comments]) // thêm vào đầu
     setReplyTo(null) // reset reply nếu có
+  }
+
+  const handleDeleteComment = async (token, commentId) => {
+    try {
+      const res = await deleteComment(token, commentId)
+      showSnackbar(res)
+      setComments((prevComments) =>
+        prevComments.filter(
+          (c) => c.id !== commentId && c.parent_id !== commentId,
+        ),
+      )
+    } catch (error) {
+      console.log(error)
+      showSnackbar({ status: 'error', message: 'Xoá comment thất bại' })
+    }
   }
 
   const ChapterNavigation = (className) => {
@@ -190,7 +239,6 @@ const Reader = () => {
         {/* Nút Chapter List */}
         <button
           className={`btn btn-primary ${className}`}
-          // onClick={() => navigate(`/story/${storyDetails.id}`)}>
           onClick={() => setShowTOC(true)}>
           <FontAwesomeIcon icon={faBars} />
         </button>
@@ -350,7 +398,7 @@ const Reader = () => {
 
   return (
     <>
-      <div className='container mx-auto p-4 flex-grow-1'>
+      <div className='container mx-auto flex-grow-1'>
         {showTOC && (
           <TableOfContents
             bookId={id}
@@ -361,30 +409,40 @@ const Reader = () => {
 
         {storyDetails && (
           <div className='text-center'>
-            <button
-              className='mb-4 cursor-pointer bg-transparent border-0'
+            <h2
+              className='mb-0 cursor-pointer opacity-hover-50 bg-transparent fs-5 fw-bold'
               onClick={() => navigate(`/story/${storyDetails.id}`)}>
-              <h1 className='text-center'>{storyDetails.title}</h1>
-            </button>
+              {storyDetails.title}
+            </h2>
           </div>
         )}
         {content && (
           <>
-            <h3 className='text-center'>
-              Chương {content.index}: {content.title}
-            </h3>
-            <div
-              className={
-                'justify-content-between mt-4 chapter-nav d-flex border rounded bg-light p-2'
-              }>
-              {ChapterNavigation()}
-            </div>
-            <div className='d-flex justify-content-between border-bottom pb-2 border-dark fst-italic'>
-              <span>Ngày phát hành: {content.created_at}</span>
-              <span>{content.word_count} từ</span>
-            </div>
+            {showNav && (
+              <div
+                className={
+                  'justify-content-between mt-4 chapter-nav d-flex rounded bg-transparent p-2 position-fixed start-0 bottom-0 end-0'
+                }>
+                {ChapterNavigation('d-md-none d-block')}
+                <button
+                  className='btn btn-primary d-md-none d-block'
+                  onClick={() =>
+                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                  }>
+                  <FontAwesomeIcon icon={faArrowUp} />
+                </button>
+              </div>
+            )}
 
-            <div>
+            <h5 className='text-center mb-0 fw-bold fs-6'>
+              Chương {content.index}: {content.title}
+            </h5>
+            <h6 className='text-center fw-bold fs-7 mb-4'>
+              Cập nhật: {timeAgo(content.created_at)} - Độ dài:{' '}
+              {content.word_count} từ
+            </h6>
+
+            <div ref={contentRef}>
               {content.content.split('\n').map((line, index) => {
                 const imgMatch = line.match(/^\[!img\]\((.+)\)$/)
                 if (imgMatch) {
@@ -410,75 +468,39 @@ const Reader = () => {
           </>
         )}
 
-        {/* Bình luận */}
-        <div className='d-flex flex-column mb-4 p-4 border rounded'>
-          <h3>Bình luận</h3>
-          <CommentBox
-            defaultContent=''
-            onCancel={null}
-            onSend={(mess) => handleSendComment(mess)}
-            focus={false}
-          />
-          {buildCommentTree(comments).map((comment) => (
-            <div className='border p-2 mb-2' key={comment.id}>
-              <CommentItem comment={comment} />
-              <div className='d-flex flex-row align-items-center'>
-                <h6 className='me-3'>{timeAgo(comment.created_at)}</h6>
-                <button
-                  className='btn btn-light m-0 p-0 d-flex flex-row'
-                  onClick={() => handleReply(comment.id)}
-                  style={{ color: 'var(--color-bg-badge)' }}>
-                  <FontAwesomeIcon icon={faComment} />
-                  <p className='p-0 m-0'>Trả lời</p>
-                </button>
-              </div>
-              {replyTo === comment.id && (
-                <CommentBox
-                  defaultContent=''
-                  onCancel={() => setReplyTo(null)}
-                  onSend={(mess) => handleSendComment(mess, comment.id)}
-                />
-              )}
-              {/* Hiển thị replies lồng nhau */}
-              {comment.replies?.length > 0 && (
-                <div className='ms-5'>
-                  {comment.replies.map((reply) => (
-                    <div className='' key={reply.id}>
-                      <CommentItem comment={reply} />
-                      <div className='d-flex flex-row align-items-center'>
-                        <h6 className='me-3'>{timeAgo(comment.created_at)}</h6>
-                        <button
-                          className='btn btn-light m-0 p-0 d-flex flex-row'
-                          onClick={() => handleReply(reply.id)}
-                          style={{ color: 'var(--color-bg-badge)' }}>
-                          <FontAwesomeIcon icon={faComment} />
-                          <h6>Trả lời</h6>
-                        </button>
-                      </div>
-                      {replyTo === reply.id && (
-                        <CommentBox
-                          defaultContent={`@${reply.User.username} `}
-                          onCancel={() => setReplyTo(null)}
-                          onSend={(mess) => handleSendComment(mess, comment.id)}
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
         <div
           className={
-            'justify-content-between mt-4 chapter-nav d-flex border rounded bg-light p-2'
+            'justify-content-between mt-4 chapter-nav d-flex border rounded bg-transparent p-2 mb-5'
           }>
           {ChapterNavigation()}
         </div>
+
+        {/* Bình luận */}
+        <div className='d-flex flex-column mb-4 p-4 border rounded cus-container'>
+          <h3>Bình luận</h3>
+          <div className='pb-4'>
+            <CommentBox
+              defaultContent=''
+              onCancel={null}
+              onSend={(mess) => handleSendComment(mess)}
+              focus={false}
+            />
+          </div>
+
+          {buildCommentTree(comments).map((comment) => (
+            <CommentNode
+              key={comment.id}
+              comment={comment}
+              replyTo={replyTo}
+              setReplyTo={setReplyTo}
+              handleSendComment={handleSendComment}
+              handleDeleteComment={handleDeleteComment}
+            />
+          ))}
+        </div>
       </div>
-      <div className='position-fixed bottom-0 end-0 p-4 d-flex flex-column gap-2'>
-        {ChapterNavigation('d-md-block d-none')}
+      <div className='position-fixed bottom-0 end-0 p-4 d-md-flex d-none flex-column gap-2'>
+        {ChapterNavigation()}
         <button
           className='btn btn-primary'
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
@@ -486,6 +508,67 @@ const Reader = () => {
         </button>
       </div>
     </>
+  )
+}
+
+const CommentNode = ({
+  comment,
+  replyTo,
+  setReplyTo,
+  handleSendComment,
+  handleDeleteComment,
+}) => {
+  const user = useSelector((state) => state.user)
+
+  const handleReplyClick = () => setReplyTo(comment.id)
+
+  return (
+    <div className='p-0 mb-2'>
+      <CommentItem comment={comment} />
+
+      <div className='d-flex flex-row align-items-center ms-5'>
+        <h6 className='me-3 ms-2'>{timeAgo(comment.created_at)}</h6>
+        <div
+          className='btn opacity-hover-50 m-0 p-0 d-flex flex-row me-3'
+          onClick={handleReplyClick}>
+          <FontAwesomeIcon icon={faComment} />
+          <p className='p-0 m-0'>Trả lời</p>
+        </div>
+        {user.id === comment.user_id && (
+          <div
+            className='btn opacity-hover-50 m-0 p-0 d-flex flex-row text-danger'
+            onClick={() => handleDeleteComment(user.token, comment.id)}>
+            <FontAwesomeIcon icon={faTrash} />
+            <p className='p-0 m-0'>Xoá</p>
+          </div>
+        )}
+      </div>
+
+      {replyTo === comment.id && (
+        <CommentBox
+          defaultContent={`@${comment.User?.username || ''} `}
+          onCancel={() => setReplyTo(null)}
+          onSend={(mess) =>
+            handleSendComment(mess, comment.parent_id ?? comment.id)
+          }
+        />
+      )}
+
+      {comment.replies?.length > 0 && (
+        <div className='ms-5'>
+          {comment.replies.map((reply) => (
+            <CommentNode
+              key={reply.id}
+              comment={reply}
+              replyTo={replyTo}
+              setReplyTo={setReplyTo}
+              handleSendComment={handleSendComment}
+              handleDeleteComment={handleDeleteComment}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
 

@@ -4,7 +4,6 @@ import { getChapters } from '../services/api'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark } from '@fortawesome/free-solid-svg-icons'
 
-
 const TableOfContents = ({ onClose, currentIndex = 1, bookId }) => {
   const [padLength, setPadLength] = useState()
   const [chapters, setChapters] = useState(null)
@@ -37,7 +36,7 @@ const TableOfContents = ({ onClose, currentIndex = 1, bookId }) => {
   return (
     <div
       className='position-fixed top-0 end-0 vh-100 p-1'
-      style={{ zIndex: 999 }}>
+      style={{ zIndex: 1001 }}>
       <div
         className='border shadow-sm p-1 position-relative h-100 overflow-auto bg-light rounded'
         style={{
@@ -47,7 +46,8 @@ const TableOfContents = ({ onClose, currentIndex = 1, bookId }) => {
         }}>
         <button
           type='button'
-          className='btn btn-sm btn-danger position-absolute top-0 end-0 m-1'
+          className='btn btn-sm btn-danger position-fixed top-0 end-0 m-3'
+          style={{ zIndex: 9999 }}
           onClick={onClose}>
           {/* &times; */}
           <FontAwesomeIcon icon={faXmark} />

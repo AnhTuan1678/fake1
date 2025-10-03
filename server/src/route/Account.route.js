@@ -6,6 +6,7 @@ const upload = require('../utlis/multer')
 const uploadToImgBB = require('../utlis/imgbb')
 const fs = require('fs')
 const authenticateToken = require('../middleware/authenticateToken')
+const { Sequelize } = require('sequelize')
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret'
 
@@ -117,6 +118,38 @@ router.post('/login', async (req, res) => {
 })
 
 // ============================
+// Đổi mật khẩu
+// ============================
+router.post('/change-password', authenticateToken, async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ error: 'Vui lòng nhập đầy đủ thông tin' })
+    }
+
+    const user = await db.User.findByPk(req.user.id)
+    if (!user) {
+      return res.status(404).json({ error: 'Người dùng không tồn tại' })
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password_hash)
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Mật khẩu cũ không đúng' })
+    }
+
+    const newPasswordHash = await bcrypt.hash(newPassword, 10)
+    user.password_hash = newPasswordHash
+    await user.save()
+
+    res.status(200).json({ message: 'Đổi mật khẩu thành công' })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Lỗi server' })
+  }
+})
+
+// ============================
 // Lấy thông tin user
 // ============================
 router.get('/me', authenticateToken, async (req, res) => {
@@ -182,6 +215,28 @@ router.get('/progress', authenticateToken, async (req, res) => {
     const progressList = await db.UserProgress.findAll({
       where: { user_id: req.user.id },
       order: [['updated_at', 'DESC']],
+      include: [
+        {
+          model: db.Book,
+          include: [
+            {
+              model: db.Chapter,
+              attributes: ['id', 'title', 'index'],
+              where: Sequelize.and(
+                Sequelize.where(
+                  Sequelize.col('Book.id'),
+                  Sequelize.col('UserProgress.book_id'),
+                ),
+                Sequelize.where(
+                  Sequelize.col('Book->Chapters.index'),
+                  Sequelize.col('UserProgress.last_chapter_index'),
+                ),
+              ),
+              required: false,
+            },
+          ],
+        },
+      ],
     })
 
     if (!progressList || progressList.length === 0) {
@@ -360,18 +415,6 @@ router.get('/bookshelf', authenticateToken, async (req, res) => {
       include: [
         {
           model: db.Book,
-          attributes: [
-            'id',
-            'title',
-            'author',
-            'status',
-            'chapter_count',
-            'word_count',
-            'like',
-            'views',
-            'followers',
-            'url_avatar',
-          ],
         },
       ],
       order: [['saved_at', 'DESC']],

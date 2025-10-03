@@ -18,6 +18,7 @@ export const formatterStoryDetail = (book) => {
     updatedDate: book.updated_at,
     reviewCount: book.review_count,
     totalRating: book.total_rating,
+    chapters: book.Chapters || [],
   }
 }
 

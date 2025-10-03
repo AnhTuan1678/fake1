@@ -14,7 +14,7 @@ const Snackbar = ({ status = 'success', message = '', onClose }) => {
     const timer = setTimeout(() => {
       setShow(false)
       if (onClose) onClose()
-    }, 2000) // 2 giây
+    }, 2000) // 1 giây
     return () => clearTimeout(timer)
   }, [onClose])
 
@@ -35,12 +35,12 @@ const Snackbar = ({ status = 'success', message = '', onClose }) => {
   return (
     <div
       className={`toast show position-fixed ${
-        window.innerWidth < 768 ? 'bottom-0 end-0' : ' top-0 left-0'
+        window.innerWidth < 768 ? 'bottom-0 end-0' : 'top-0 end-0'
       } m-3 ${bgClass} text-white`}
       role='alert'
       aria-live='assertive'
       aria-atomic='true'
-      style={{ minWidth: '250px' }}>
+      style={{ minWidth: '250px', zIndex: 9999 }}>
       <div className='d-flex'>
         <div className='toast-body d-flex align-items-center'>
           <FontAwesomeIcon icon={icon} className='me-2' />

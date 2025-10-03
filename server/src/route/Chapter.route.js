@@ -64,6 +64,7 @@ router.post('/comment', authenticateToken, async (req, res) => {
 router.delete('/comment/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params
+    console.log(id)
 
     const comment = await db.Comment.findByPk(id)
     if (!comment)

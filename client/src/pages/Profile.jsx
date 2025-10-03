@@ -1,15 +1,21 @@
 import { useEffect, useState, useRef } from 'react'
-import { getProfile, updateAvatar } from '../services/api'
+import { getProfile, updateAvatar, getUserProgress } from '../services/api'
 import { formatterProfile } from '../utils/formatter'
 import styles from './Profile.module.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faFolder } from '@fortawesome/free-solid-svg-icons'
+import { faFolder, faKey } from '@fortawesome/free-solid-svg-icons'
 import { useDispatch } from 'react-redux'
 import { updateAvatar as updateAvatarAction } from '../redux/userSlice'
+import StoryCard from '../components/StoryCard'
+import ChangePasswordPopup from '../components/ChangePasswordPopup'
+import { formatterStoryDetail } from '../utils/formatter'
 
 const Profile = () => {
   const [profile, setProfile] = useState()
+  const [progress, setProgress] = useState()
   const fileInputRef = useRef(null)
+  const [visibleCount, setVisibleCount] = useState(12)
+  const [isOpenChangePass, setIsOpenChangePass] = useState(false)
 
   const dispatch = useDispatch()
 
@@ -18,6 +24,8 @@ const Profile = () => {
       const token = localStorage.getItem('token')
       const data = await getProfile(token)
       setProfile(formatterProfile(data))
+      const res = await getUserProgress(token)
+      setProgress(res)
     }
     fetchData()
   }, [])
@@ -88,16 +96,25 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Contact button */}
         <div className='d-flex justify-content-end mb-4 mt-5'>
-          <button className='btn btn-success'>
-            <i className='bi bi-send-fill'></i> Liên hệ
+          <button
+            className='btn btn-warning'
+            onClick={() => {
+              setIsOpenChangePass(true)
+            }}>
+            <FontAwesomeIcon icon={faKey} className='me-2' />
+            Đổi mật khẩu
           </button>
+          <ChangePasswordPopup
+            isOpen={isOpenChangePass}
+            onClose={() => setIsOpenChangePass(false)}
+            token={localStorage.getItem('token')}
+          />
         </div>
 
         <div className='row'>
           {/* Left: Progress & info */}
-          <div className='col-md-4 mb-4'>
+          <div className='col-md-4 m-0'>
             <div className='card p-3'>
               <h5>{profile.level}</h5>
               <div className='progress mb-2' style={{ height: '20px' }}>
@@ -114,36 +131,68 @@ const Profile = () => {
               <p>{profile.status}</p>
               <ul className='list-group list-group-flush'>
                 <li className='list-group-item'>
-                  <strong>Tên đăng nhập:</strong> {profile.username}
+                  <strong>Id:</strong> {profile.id}
+                </li>
+                <li className='list-group-item'>
+                  <strong>Username:</strong> {profile.username}
                 </li>
                 <li className='list-group-item'>
                   <strong>Email:</strong> {profile.email}
                 </li>
                 <li className='list-group-item'>
-                  <strong>Sinh thần:</strong> {profile.id}
-                </li>
-                <li className='list-group-item'>
                   <strong>Ngày tạo:</strong>{' '}
-                  {new Date(profile.createdDate).toLocaleString()}
+                  {new Date(profile.createdDate).toLocaleDateString()}
                 </li>
               </ul>
             </div>
           </div>
 
           {/* Right: Story info */}
-          <div className='col-md-8'>
-            <div className='mb-3'>
+          <div className='col-md-8 m-0 p-0'>
+            <div className='mb-3 border shadow p-2 m-0 rounded'>
               <h5 className='border-bottom pb-2'>
                 Truyện đã đăng ({profile.storiesPosted})
               </h5>
               {profile.storiesPosted === 0 && <p>Không có truyện nào</p>}
             </div>
-            <div className='mb-3'>
-              <h5 className='border-bottom pb-2'>
-                Truyện đang tham gia ({profile.storiesJoined})
-              </h5>
-              {profile.storiesJoined === 0 && <p>Không có truyện nào</p>}
-            </div>
+            {progress && (
+              <div className='mb-3 border shadow p-2 m-0 rounded'>
+                <h5 className='border-bottom pb-2'>
+                  Truyện đã đọc ({progress?.length})
+                </h5>
+                {progress?.length === 0 ? (
+                  <p>Không có truyện nào</p>
+                ) : (
+                  <>
+                    <div className='row mx-0'>
+                      {progress.slice(0, visibleCount).map((book) => (
+                        <StoryCard
+                          key={book.id}
+                          story={formatterStoryDetail(book.Book)}
+                          className='col-4 col-md-4 col-lg-3 p-1'
+                        />
+                      ))}
+                    </div>
+                    {visibleCount < progress.length && (
+                      <div className='text-center'>
+                        <button
+                          className='btn btn-outline-primary m-3'
+                          onClick={() => setVisibleCount(visibleCount + 12)}>
+                          Xem thêm
+                        </button>
+                        <button
+                          className='btn btn-outline-primary m-3'
+                          onClick={() =>
+                            setVisibleCount(visibleCount + 9999999)
+                          }>
+                          Xem tất cả
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
