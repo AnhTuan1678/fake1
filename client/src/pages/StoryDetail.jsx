@@ -1,13 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useEffect, useRef, useState } from 'react'
-import {
-  getStoryDetails,
-  getChapters,
-  getProgressByBook,
-  addToBookshelf,
-  getReviewsByBook,
-} from '../services/api'
-import styles from './StoryDetail.module.css'
+import { useSelector } from 'react-redux'
+import { reviewAPI, bookAPI, progressAPI, bookshelfAPI } from '../services/api'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faHeart,
@@ -17,14 +11,18 @@ import {
   faShareAlt,
   faList,
   faDownload,
+  faUser,
+  faRss,
+  faCalendar,
+  faStar,
 } from '@fortawesome/free-solid-svg-icons'
 import { CommentItem } from '../components/CommentItem'
 import { StarRating } from '../components/StartRating'
 import { ReviewForm } from '../components/ReviewForm'
-import { formatterStoryDetail } from '../utils/formatter'
-import { useSelector } from 'react-redux'
 import { useSnackbar } from '../context/SnackbarContext'
 import { timeAgo } from '../utils/timeAgo'
+import { formatterStoryDetail } from '../utils/formatter'
+import styles from './StoryDetail.module.css'
 
 const StoryDetail = () => {
   const { id } = useParams()
@@ -44,12 +42,12 @@ const StoryDetail = () => {
   // lấy thông tin sách
   useEffect(() => {
     const fetchData = async () => {
-      const data = await getStoryDetails(id)
+      const data = await bookAPI.getStoryDetails(id)
       setStoryDetails(data)
       setAvgRating(
         data.reviewCount > 0
           ? (data.totalRating / data.reviewCount).toFixed(1)
-          : 0,
+          : null,
       )
     }
 
@@ -59,7 +57,7 @@ const StoryDetail = () => {
   // lấy danh sách chương
   useEffect(() => {
     const fetchChapters = async () => {
-      const chapterData = await getChapters(id)
+      const chapterData = await bookAPI.getChapters(id)
       setChapters(chapterData)
       setShowAllChapters(chapterData.length <= visibleChaptersDefault)
     }
@@ -73,7 +71,7 @@ const StoryDetail = () => {
       const token = currentUser.token
       if (token) {
         try {
-          const data = await getProgressByBook(token, id)
+          const data = await progressAPI.getProgressByBook(token, id)
           setProgress(data)
         } catch (err) {
           console.warn('Chưa có tiến trình đọc hoặc lỗi:', err)
@@ -81,12 +79,12 @@ const StoryDetail = () => {
       }
     }
     fetchProgress()
-  }, [id])
+  }, [currentUser.token, id])
 
   // Lấy review
   useEffect(() => {
     const fetchReview = async () => {
-      const review = await getReviewsByBook(id)
+      const review = await reviewAPI.getReviewsByBook(id)
       setReview(review.filter((r) => r.user_id !== currentUser.id))
     }
     fetchReview()
@@ -94,9 +92,16 @@ const StoryDetail = () => {
 
   const handleFollowButton = async () => {
     const token = currentUser.token
-    const res = await addToBookshelf(token, id)
+    const res = await bookshelfAPI.addToBookshelf(token, id)
+    const formatted = formatterStoryDetail(res.book)
+    setStoryDetails((pre) => ({ ...formatted, genres: pre.genres }))
+    setAvgRating(
+      formatted.reviewCount > 0
+        ? (formatted.totalRating / formatted.reviewCount).toFixed(1)
+        : null,
+    )
     showSnackbar(res)
-    setStoryDetails(formatterStoryDetail(res.book))
+    if (res.ok) setStoryDetails(formatterStoryDetail(res.book))
   }
 
   const handleShareClick = () => {
@@ -112,11 +117,14 @@ const StoryDetail = () => {
       })
   }
 
-  const InfoItem = ({ label, value }) => {
+  const InfoItem = ({ label, value, icon }) => {
     return (
-      <div>
-        <label className='me-2 fw-bold'>{label}:</label>
-        <span>{value}</span>
+      <div className='row'>
+        <label className='m-0 fw-bold opacity-75 col col-6 col-md-4 col-lg-3'>
+          <FontAwesomeIcon icon={icon} />
+          {label}
+        </label>
+        <span className='m-0 opacity-75 col'>{value}</span>
       </div>
     )
   }
@@ -147,14 +155,18 @@ const StoryDetail = () => {
     <div className='container mx-auto p-0 p-top-4 p-end-4 flex-grow-1'>
       {storyDetails && (
         <div className='d-flex flex-column p-3 p-md-4 mb-4 border rounded cus-container'>
-          <div className='d-flex flex-column flex-md-row mb-4 align-items-center'>
-            <img
-              className={styles['story-image']}
-              src={storyDetails.urlAvatar}
-              alt={storyDetails.title}
-            />
-            <div className='m-4 d-flex flex-column flex-grow-1'>
-              <p className='fs-3 fw-bold'>{storyDetails.title}</p>
+          <div className='row'>
+            <div className='col col-12 col-md-4 col-lg-3 d-flex align-items-center justify-content-center'>
+              <div className='w-50 w-md-100'>
+                <div
+                  className='ratio ratio-2x3 bg-cover bg-center'
+                  style={{
+                    backgroundImage: `url(${storyDetails.urlAvatar})`,
+                  }}></div>
+              </div>
+            </div>
+            <div className='m-4 d-flex flex-column col'>
+              <p className='fs-2'>{storyDetails.title}</p>
               <div className='d-flex flex-row mb-2 flex-wrap'>
                 {storyDetails.genres.map((genre, index) => (
                   <div
@@ -169,20 +181,30 @@ const StoryDetail = () => {
                 <InfoItem
                   label='Đánh giá'
                   value={<StarRating rating={parseFloat(avgRating)} />}
+                  icon={faStar}
                 />
               )}
               <div>
-                <InfoItem label='Tác giả' value={storyDetails.author} />
+                <InfoItem
+                  label='Tác giả'
+                  value={storyDetails.author}
+                  icon={faUser}
+                />
               </div>
-              <InfoItem label='Tình trạng' value={storyDetails.status} />
+              <InfoItem
+                label='Tình trạng'
+                value={storyDetails.status}
+                icon={faRss}
+              />
               <InfoItem
                 label='Ngày đăng'
                 value={new Date(
                   storyDetails.publishedDate,
                 ).toLocaleDateString()}
+                icon={faCalendar}
               />
               <div className='d-flex flex-column gap-3'>
-                <div className='d-flex flex-row justify-content-between flex-wrap'>
+                <div className='d-flex flex-row justify-content-between flex-wrap p-3 col col-12 col-md-10 col-lg-8'>
                   <div className='btn opacity-hover-50 p-0'>
                     <FontAwesomeIcon icon={faHeart} /> {storyDetails.like}
                   </div>
@@ -197,7 +219,7 @@ const StoryDetail = () => {
                   </div>
                   <div className='btn opacity-hover-50 p-0'>
                     <FontAwesomeIcon icon={faClock} />
-                    {timeAgo(storyDetails.updatedDate)}
+                    {timeAgo(storyDetails.updatedAt)}
                   </div>
                   <div className='btn opacity-hover-50 p-0'>
                     <FontAwesomeIcon icon={faList} />
@@ -215,7 +237,7 @@ const StoryDetail = () => {
 
                 <div className='d-flex flex-row gap-2 flex-wrap'>
                   <div
-                    className='btn btn-warning'
+                    className='btn btn-warning text-white'
                     onClick={() =>
                       navigate(`/story/${storyDetails.id}/chapter/1`)
                     }>
@@ -256,18 +278,20 @@ const StoryDetail = () => {
                 </div>
               ))}
             </div>
-            <div
-              style={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: '4rem',
-                background:
-                  'linear-gradient(180deg, hsla(0,0%,100%,0) 0%, #fff 75%, #fff)',
-                pointerEvents: 'none',
-              }}
-            />
+            {visibleChaptersDefault < chapters.length && !showAllChapters && (
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  height: '4rem',
+                  background:
+                    'linear-gradient(180deg, hsla(0,0%,100%,0) 0%, #fff 75%, #fff)',
+                  pointerEvents: 'none',
+                }}
+              />
+            )}
           </div>
           {visibleChaptersDefault < chapters.length && !showAllChapters && (
             <div className='text-center w-100'>

@@ -1,10 +1,31 @@
 .header {
-    background-color: var(--color-header-background);
     position: fixed;
+    height: 40px;
     top: 0;
     left: 0;
     right: 0;
     z-index: 1000;
+    background-image: url('../assets/image/bg-header.jpg');
+}
+
+.logo {
+    font-size: 48px;
+    font-weight: bold;
+    color: transparent;
+    background: linear-gradient(90deg, #ffff00, #00ff00, #00bcd4);
+    -webkit-background-clip: text;
+    background-clip: text;
+    background-size: 300% 100%;
+    animation: gradientMove 5s linear infinite alternate;
+}
+
+@keyframes gradientMove {
+    0% {
+        background-position: 0% 0%;
+    }
+    100% {
+        background-position: 100% 0%;
+    }
 }
 
 @font-face {

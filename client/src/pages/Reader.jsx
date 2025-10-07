@@ -1,15 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useEffect, useRef, useState } from 'react'
-import {
-  getChapterContent,
-  getStoryDetails,
-  saveProgress,
-  updateSettings,
-  getProfile,
-  createComment,
-  deleteComment,
-  getCommentsByChapter,
-} from '../services/api'
+import { commentAPI, bookAPI, progressAPI, userAPI } from '../services/api'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import styles from './Reader.module.css'
 import {
@@ -19,9 +10,6 @@ import {
   faArrowUp,
   faBars,
   faCog,
-  faTimes,
-  faSave,
-  faRefresh,
   faComment,
   faTrash,
 } from '@fortawesome/free-solid-svg-icons'
@@ -32,6 +20,7 @@ import { useSelector } from 'react-redux'
 import { buildCommentTree } from '../utils/buildCommentTree'
 import { timeAgo } from '../utils/timeAgo'
 import { useSnackbar } from '../context/SnackbarContext'
+import SettingsPopup from '../components/SettingsPopup'
 
 const Reader = () => {
   const defaultSetting = {
@@ -60,8 +49,8 @@ const Reader = () => {
   // Lấy nội dung chương
   useEffect(() => {
     const fetchContent = async () => {
-      const data = await getChapterContent(chapterIndex, id)
-      const comments = await getCommentsByChapter(data.id)
+      const data = await bookAPI.getChapterContent(chapterIndex, id)
+      const comments = await commentAPI.getCommentsByChapter(data.id)
       window.scrollTo({ top: 0, behavior: 'smooth' })
       setContent(data)
       setComments(comments)
@@ -70,7 +59,7 @@ const Reader = () => {
     // Lưu tiến trình đọc khi load chương
     if (currentUser.token) {
       try {
-        saveProgress(currentUser.token, id, chapterIndex, 0)
+        progressAPI.saveProgress(currentUser.token, id, chapterIndex, 0)
       } catch (err) {
         console.error('Lỗi khi lưu tiến trình:', err)
       }
@@ -82,7 +71,7 @@ const Reader = () => {
   // Lấy thông tin sách
   useEffect(() => {
     const fetchStoryDetails = async () => {
-      const data = await getStoryDetails(id)
+      const data = await bookAPI.getStoryDetails(id)
       setStoryDetails(data)
     }
 
@@ -94,11 +83,11 @@ const Reader = () => {
     const fetchUserSettings = async () => {
       const token = currentUser.token
       if (token) {
-        const profile = await getProfile(token)
+        const profile = await userAPI.getProfile(token)
         if (profile.personal_settings) {
           const defaultSetting = {
-            fontSize: '20px',
-            fontFamily: 'Arial',
+            fontSize: '18px',
+            fontFamily: 'Times New Roman',
             lineHeight: 1.5,
             zoom: 1,
           }
@@ -145,50 +134,16 @@ const Reader = () => {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Lưu setting
-  const handleSaveButton = async () => {
-    localStorage.setItem('readerSettings', JSON.stringify(setting))
-    setShowSettings(false)
-
-    // Lưu lên server
-    const token = currentUser.token
-    if (token) {
-      try {
-        await updateSettings(token, setting)
-        console.log('Đã lưu setting lên server')
-      } catch (err) {
-        console.error('Lỗi khi lưu setting:', err)
-      }
-    }
-  }
-
-  // Reset setting
-  const handleResetButton = async () => {
-    const defaultSetting = {
-      fontSize: '20px',
-      fontFamily: 'Arial',
-      lineHeight: 1.5,
-      zoom: 1,
-    }
-    setSetting(defaultSetting)
-
-    // Lưu lên server
-    const token = currentUser.token
-    if (token) {
-      try {
-        await updateSettings(token, setting)
-        console.log('Đã lưu setting lên server')
-      } catch (err) {
-        console.error('Lỗi khi lưu setting:', err)
-      }
-    }
-  }
-
   const handleSendComment = async (message, parentId = null) => {
     if (!message || !message.trim()) return
 
     const token = currentUser.token
-    const res = await createComment(token, content.id, message, parentId)
+    const res = await commentAPI.createComment(
+      token,
+      content.id,
+      message,
+      parentId,
+    )
     res.User = { ...currentUser, avatar_url: currentUser.avatarUrl }
 
     setComments([res, ...comments]) // thêm vào đầu
@@ -197,7 +152,7 @@ const Reader = () => {
 
   const handleDeleteComment = async (token, commentId) => {
     try {
-      const res = await deleteComment(token, commentId)
+      const res = await commentAPI.deleteComment(token, commentId)
       showSnackbar(res)
       setComments((prevComments) =>
         prevComments.filter(
@@ -265,133 +220,6 @@ const Reader = () => {
           }}>
           <FontAwesomeIcon icon={faArrowRight} />
         </button>
-
-        {showSettings && (
-          // Overlay nền xám khi popup mở
-          <div className='cus-overlay' onClick={() => setShowSettings(false)}>
-            {/* Popup Settings */}
-            <div
-              className='position-fixed top-50 start-50 translate-middle bg-white p-4 rounded shadow'
-              style={{ zIndex: 1000, minWidth: '350px' }}
-              onClick={(e) => e.stopPropagation()}>
-              {/* Nút close */}
-              <button
-                className='btn btn-light position-absolute top-0 end-0 m-2 p-1'
-                onClick={() => setShowSettings(false)}
-                style={{ borderRadius: '50%', width: '30px', height: '30px' }}>
-                <FontAwesomeIcon icon={faTimes} />
-              </button>
-              <h5>Settings</h5>
-
-              {/* font size */}
-              <div className='mb-2 d-flex'>
-                <label className='text-center'>Font Size:</label>
-                <div className='flex-grow-1'></div>
-                <h6 className='text-center p-0 m-0'>{setting.fontSize}</h6>
-                <input
-                  type='range'
-                  min='12'
-                  max='36'
-                  value={parseInt(setting.fontSize, 10)}
-                  onChange={(e) =>
-                    setSetting((prev) => ({
-                      ...prev,
-                      fontSize: `${e.target.value}px`,
-                    }))
-                  }
-                />
-              </div>
-
-              {/* font family */}
-              <div className='mb-2 d-flex align-items-center'>
-                <label className='text-center'>Font:</label>
-                <div className='flex-grow-1'></div>
-                <select
-                  className='form-select w-auto'
-                  value={setting.fontFamily}
-                  onChange={(e) =>
-                    setSetting((prev) => ({
-                      ...prev,
-                      fontFamily: e.target.value,
-                    }))
-                  }>
-                  <option value='Arial' style={{ fontFamily: 'Arial' }}>
-                    Arial
-                  </option>
-                  <option
-                    value='Times New Roman'
-                    style={{ fontFamily: 'Times New Roman' }}>
-                    Times New Roman
-                  </option>
-                  <option value='Verdana' style={{ fontFamily: 'Verdana' }}>
-                    Verdana
-                  </option>
-                  <option value='Tahoma' style={{ fontFamily: 'Tahoma' }}>
-                    Tahoma
-                  </option>
-                </select>
-              </div>
-
-              {/* line height */}
-              <div className='mb-2 d-flex align-items-center'>
-                <label className='text-center'>Line Height:</label>
-                <div className='flex-grow-1'></div>
-                <h6 className='text-center p-0 m-0'>{setting.lineHeight}</h6>
-                <input
-                  type='range'
-                  min='1'
-                  max='2'
-                  step='0.1'
-                  value={setting.lineHeight}
-                  onChange={(e) =>
-                    setSetting((prev) => ({
-                      ...prev,
-                      lineHeight: parseFloat(e.target.value),
-                    }))
-                  }
-                />
-              </div>
-
-              {/* zoom */}
-              <div className='mb-2 d-flex align-items-center'>
-                <label className='text-center'>Zoom:</label>
-                <div className='flex-grow-1'></div>
-                <h6 className='text-center p-0 m-0'>{`${parseInt(
-                  setting.zoom * 100,
-                )}%`}</h6>
-                <input
-                  type='range'
-                  min='50'
-                  max='200'
-                  value={parseInt(setting.zoom * 100)}
-                  onChange={(e) =>
-                    setSetting((prev) => ({
-                      ...prev,
-                      zoom: e.target.value / 100,
-                    }))
-                  }
-                />
-                %
-              </div>
-
-              <div className='mt-4 d-flex'>
-                {/* Nút reset */}
-                <button
-                  className='btn btn-warning d-flex '
-                  onClick={handleResetButton}>
-                  <FontAwesomeIcon icon={faRefresh} />
-                </button>
-                <div className='flex-grow-1'></div>
-                {/* Nút Save */}
-                <button
-                  className='btn btn-success d-flex '
-                  onClick={handleSaveButton}>
-                  <FontAwesomeIcon icon={faSave} />
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </>
     )
   }
@@ -406,11 +234,19 @@ const Reader = () => {
             currentIndex={chapterIndex}
           />
         )}
+        {showSettings && (
+          <SettingsPopup
+            defaultSetting={setting || defaultSetting}
+            onClose={() => setShowSettings(false)}
+            onSave={(set) => setSetting(set)}
+            onChange={(set) => setSetting(set)}
+          />
+        )}
 
         {storyDetails && (
           <div className='text-center'>
             <h2
-              className='mb-0 cursor-pointer opacity-hover-50 bg-transparent fs-5 fw-bold'
+              className={`mb-0 cursor-pointer opacity-hover-50 bg-transparent fs-4 fw-bold ${styles.title}`}
               onClick={() => navigate(`/story/${storyDetails.id}`)}>
               {storyDetails.title}
             </h2>
@@ -434,15 +270,15 @@ const Reader = () => {
               </div>
             )}
 
-            <h5 className='text-center mb-0 fw-bold fs-6'>
+            <h5 className={`text-center mb-0 fw-bold fs-6 ${styles.title}`}>
               Chương {content.index}: {content.title}
             </h5>
-            <h6 className='text-center fw-bold fs-7 mb-4'>
+            <h6 className={`text-center fw-bold fs-7 mb-4 ${styles.title}`}>
               Cập nhật: {timeAgo(content.created_at)} - Độ dài:{' '}
               {content.word_count} từ
             </h6>
 
-            <div ref={contentRef}>
+            <div ref={contentRef} className='row'>
               {content.content.split('\n').map((line, index) => {
                 const imgMatch = line.match(/^\[!img\]\((.+)\)$/)
                 if (imgMatch) {
@@ -456,7 +292,7 @@ const Reader = () => {
                   )
                 } else if (line.trim() !== '') {
                   return (
-                    <p style={setting} key={index}>
+                    <p className={styles.paragraph} style={setting} key={index}>
                       {line}
                     </p>
                   )

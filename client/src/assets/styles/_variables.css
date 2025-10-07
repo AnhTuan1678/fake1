@@ -1,0 +1,53 @@
+:root {
+    --color-white: #fff;
+    --color-black: #000;
+
+    --color-bg-dark: #333;
+    --color-bg-nav: #444;
+    --color-bg-hover: #666;
+
+    --color-bg-content: #f4f4f4;
+    --color-bg-sidebar: #e2e2e2;
+
+    --color-text-light: #fff;
+    --color-text-dark: #000;
+    --color-text-muted: #6c757d;
+    --color-text-link: #0d6efd;
+    --color-text-link-hover: #0a58ca;
+
+    --color-bg-badge: #4f5052;
+    --color-bg-badge-hover: #949697;
+    --color-bg-badge-active: #2f3031;
+    --color-bg-disabled: #adb5bd;
+
+    --color-border: #ccc;
+    --color-border-light: #ddd;
+    --color-border-dark: #222;
+
+    --color-shadow: rgba(0, 0, 0, 0.1);
+    --color-shadow-hover: rgba(0, 0, 0, 0.2);
+
+    --color-success: #198754;
+    --color-warning: #ffc107;
+    --color-danger: #dc3545;
+    --color-info: #0dcaf0;
+
+    --color-cus-1: #dfdfdf;
+
+    /* ----------------------------------------- */
+    --color-bg-input: #e0e0e0; /* màu nền input */
+    --color-text-input: #6b6b6b; /* màu chữ input */
+    --color-input-icon: #444444; /* màu icon */
+    --color-body-background: #e2e2e2;
+    /* #f7f7f8; */
+    --color-header-background: #f6f7f8;
+    --color-container-background: #f9f9f9;
+    /* #fefefe; */
+    --color-comment-background: #f3f4f6;
+    --color-chapter-background: #eae4d3;
+    --color-popup-background: #ccc;
+
+    --color-text-blue: #2980b9;
+
+    --primary--color: #ae4ad9;
+}

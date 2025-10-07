@@ -1,0 +1,35 @@
+.nav-bar {
+    background-color: var(--color-body-background);
+    z-index: 999 !important;
+}
+
+.active {
+    height: 100%;
+    background-color: #ffffff !important;
+    color: #ae4ad9 !important;
+    box-shadow: -1px 0 2px rgba(0, 0, 0, 0.05), 1px 0 2px rgba(0, 0, 0, 0.05);
+    opacity: 1 !important;
+}
+
+li::marker {
+    content: '';
+    display: none;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+}
+
+.genre {
+    white-space: nowrap;
+    display: inline-block;
+    padding: 5px 10px;
+    color: inherit;
+    cursor: pointer;
+}
+
+.genre span {
+    position: relative;
+    z-index: 1;
+}

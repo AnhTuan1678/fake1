@@ -1,5 +1,6 @@
 .search-bar {
-    /* max-width: 300px; */
+    max-width: 600px;
+    flex: 1;
     transition: box-shadow 0.3s;
     background-color: var(--color-bg-input);
     height: 30px;
@@ -7,6 +8,10 @@
 
 .search-bar:hover {
     box-shadow: 0 4px 10px rgba(190, 60, 60, 0.15);
+}
+
+.search-bar ul {
+    background-color: var(--color-bg-input);
 }
 
 .search-input {
@@ -21,8 +26,7 @@
 }
 
 .search-btn:hover {
-    /* background: var(--color-bg-badge); */
-    color: var(--color-white);
+    color: #786199;
 }
 
 @keyframes spin {

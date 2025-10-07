@@ -2,12 +2,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faStar as faStarSolid } from '@fortawesome/free-solid-svg-icons'
 import { useRef, useState, useEffect } from 'react'
 import { CommentItem } from './CommentItem'
-import {
-  getReviewsByBook,
-  createReview,
-  updateReview,
-  deleteReview,
-} from '../services/api'
+import { reviewAPI } from '../services/api'
 import { useSelector } from 'react-redux'
 import { useSnackbar } from '../context/SnackbarContext'
 
@@ -56,7 +51,7 @@ export function ReviewForm({ bookId }) {
 
   useEffect(() => {
     const fetchReview = async () => {
-      const review = await getReviewsByBook(bookId)
+      const review = await reviewAPI.getReviewsByBook(bookId)
       const r = review.find((c) => c.user_id === user.id) || null
       setReview(r)
       if (r) {
@@ -76,7 +71,12 @@ export function ReviewForm({ bookId }) {
       showSnackbar({ message: 'Chưa đăng nhập', status: 'warning' })
       return
     }
-    const res = await createReview(user.token, bookId, content, rating)
+    const res = await reviewAPI.createReview(
+      user.token,
+      bookId,
+      content,
+      rating,
+    )
     res.User = { ...user, avatar_url: user.avatarUrl }
     return res
   }
@@ -87,14 +87,19 @@ export function ReviewForm({ bookId }) {
       showSnackbar({ message: 'Chưa đăng nhập', status: 'warning' })
       return
     }
-    const res = await updateReview(user.token, reviewId, content, rating)
+    const res = await reviewAPI.updateReview(
+      user.token,
+      reviewId,
+      content,
+      rating,
+    )
     res.User = { ...user, avatar_url: user.avatarUrl }
     return res
   }
 
   const handleDeletePreview = async (id) => {
     if (!id) return
-    const res = await deleteReview(user.token, id)
+    const res = await reviewAPI.deleteReview(user.token, id)
     showSnackbar(res)
   }
 

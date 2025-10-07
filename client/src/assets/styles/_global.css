@@ -1,55 +1,8 @@
-:root {
-    --color-white: #fff;
-    --color-black: #000;
-
-    --color-bg-dark: #333;
-    --color-bg-nav: #444;
-    --color-bg-hover: #666;
-
-    --color-bg-content: #f4f4f4;
-    --color-bg-sidebar: #e2e2e2;
-
-    --color-text-light: #fff;
-    --color-text-dark: #000;
-    --color-text-muted: #6c757d;
-    --color-text-link: #0d6efd;
-    --color-text-link-hover: #0a58ca;
-
-    --color-bg-badge: #4f5052;
-    --color-bg-badge-hover: #949697;
-    --color-bg-badge-active: #2f3031;
-    --color-bg-disabled: #adb5bd;
-
-    --color-border: #ccc;
-    --color-border-light: #ddd;
-    --color-border-dark: #222;
-
-    --color-shadow: rgba(0, 0, 0, 0.1);
-    --color-shadow-hover: rgba(0, 0, 0, 0.2);
-
-    --color-success: #198754;
-    --color-warning: #ffc107;
-    --color-danger: #dc3545;
-    --color-info: #0dcaf0;
-
-    --color-cus-1: #dfdfdf;
-
-    /* ----------------------------------------- */
-    --color-bg-input: #e0e0e0; /* màu nền input */
-    --color-text-input: #6b6b6b; /* màu chữ input */
-    --color-input-icon: #444444; /* màu icon */
-    --color-body-background: #f7f7f8;
-    --color-header-background: #f6f7f8;
-    --color-container-background: #fefefe;
-    --color-comment-background: #f3f4f6;
-    --color-chapter-background: #eae4d3;
-}
-
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, sans-serif;
+    font-family: Tahoma, sans-serif, Helvetica, Arial;
 }
 
 body {
@@ -124,15 +77,15 @@ body {
 .cus-overlay {
     cursor: auto;
     position: fixed !important;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.2);
+    top: -100vh;
+    left: -100vw;
+    width: 300vw;
+    height: 300vh;
+    background: rgba(0, 0, 0, 0.3);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 999;
+    z-index: 1000;
 }
 
 .opacity-hover-50:hover {
@@ -140,9 +93,16 @@ body {
 }
 
 .tippy-box {
-    background-color: white;
+    background-color: var(--color-body-background);
     color: black;
     border-radius: 8px;
+    border: 1px solid #000000;
+    opacity: 88%;
+}
+
+.tippy-box > .tippy-arrow::before {
+    color: var(--color-body-background);
+    border: 1px solid #000000;
 }
 
 .tippy-content {
@@ -152,4 +112,46 @@ body {
 
 .fs-7 {
     font-size: 0.875rem;
+}
+
+.fs-8 {
+    font-size: 0.75rem;
+}
+
+.ratio-2x3 {
+    aspect-ratio: 2 / 3;
+}
+
+.bg-cover {
+    background-size: cover;
+}
+.bg-center {
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.text-blue {
+    color: var(--color-text-blue);
+}
+
+@media (max-width: 768px) {
+    .fs-md-7 {
+        font-size: 0.875rem !important;
+    }
+    .fs-md-8 {
+        font-size: 0.7rem !important;
+    }
+    .fs-md-9 {
+        font-size: 0.55rem !important;
+    }
+}
+
+@media (min-width: 768px) {
+    .w-md-100 {
+        width: 100% !important;
+    }
+}
+
+.primary-color {
+    color: var(--primary--color);
 }

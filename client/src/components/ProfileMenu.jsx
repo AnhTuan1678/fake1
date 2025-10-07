@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import styles from './ProfileMenu.module.css'
-import LoginPopup from './LoginPopup'
 import { useSelector, useDispatch } from 'react-redux'
 import { useSnackbar } from '../context/SnackbarContext'
 import { logout } from '../redux/userSlice'
@@ -16,13 +15,9 @@ import {
   faUserPlus,
 } from '@fortawesome/free-solid-svg-icons'
 import { clearCache } from '../services/cacheFetch'
-import nova from '../assets/nova.png' // avatar mặc định
+import nova from '../assets/image/GuestAvatar.png' // avatar mặc định
 
 const ProfileMenu = ({ className }) => {
-  const [authPopup, setAuthPopup] = useState({
-    show: false,
-    activeTab: 'login',
-  })
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn)
 
   const [isOpen, setIsOpen] = useState(false)
@@ -32,6 +27,7 @@ const ProfileMenu = ({ className }) => {
   const dispatch = useDispatch()
 
   const navigate = useNavigate()
+  const location = useLocation()
   const { showSnackbar } = useSnackbar()
 
   const handleLogout = () => {
@@ -78,25 +74,25 @@ const ProfileMenu = ({ className }) => {
           {isLoggedIn ? (
             <>
               <button
-                className={`dropdown-item ${styles.dropdownItem}`}
+                className={`dropdown-item slide-in-hover ${styles.dropdownItem}`}
                 onClick={() => navigate('/profile')}>
                 <FontAwesomeIcon icon={faUser} />
                 Tài khoản
               </button>
               <button
-                className={`dropdown-item ${styles.dropdownItem}`}
+                className={`dropdown-item slide-in-hover ${styles.dropdownItem}`}
                 onClick={() => navigate('/bookshelf')}>
                 <FontAwesomeIcon icon={faBookmark} />
                 Đánh dấu
               </button>
               <button
-                className={`dropdown-item ${styles.dropdownItem}`}
+                className={`dropdown-item slide-in-hover ${styles.dropdownItem}`}
                 onClick={() => navigate('/settings')}>
                 <FontAwesomeIcon icon={faCog} />
                 Cài đặt
               </button>
               <button
-                className={`dropdown-item ${styles.dropdownItem} text-danger hover-bg-danger`}
+                className={`dropdown-item slide-in-hover ${styles.dropdownItem} text-danger hover-bg-danger`}
                 onClick={() => {
                   clearCache()
                   showSnackbar({ message: 'Đã xoá cache' })
@@ -107,7 +103,7 @@ const ProfileMenu = ({ className }) => {
               <div
                 className={`dropdown-divider ${styles.dropdownDivider}`}></div>
               <button
-                className={`dropdown-item ${styles.dropdownItem}`}
+                className={`dropdown-item slide-in-hover ${styles.dropdownItem}`}
                 onClick={handleLogout}>
                 <FontAwesomeIcon icon={faSignOut} />
                 Đăng xuất
@@ -116,23 +112,27 @@ const ProfileMenu = ({ className }) => {
           ) : (
             <>
               <button
-                className={`dropdown-item ${styles.dropdownItem}`}
+                className={`dropdown-item slide-in-hover ${styles.dropdownItem}`}
                 onClick={() =>
-                  setAuthPopup({ show: true, activeTab: 'login' })
+                  navigate('/auth?action=l', {
+                    state: { from: location.pathname },
+                  })
                 }>
                 <FontAwesomeIcon icon={faSignIn} />
                 Đăng nhập
               </button>
               <button
-                className={`dropdown-item ${styles.dropdownItem}`}
+                className={`dropdown-item slide-in-hover ${styles.dropdownItem}`}
                 onClick={() =>
-                  setAuthPopup({ show: true, activeTab: 'register' })
+                  navigate('/auth?action=r', {
+                    state: { from: location.pathname },
+                  })
                 }>
                 <FontAwesomeIcon icon={faUserPlus} />
                 Đăng ký
               </button>
               <button
-                className={`dropdown-item ${styles.dropdownItem} text-danger hover-bg-danger`}
+                className={`dropdown-item slide-in-hover ${styles.dropdownItem} text-danger hover-bg-danger`}
                 onClick={() => {
                   clearCache()
                   showSnackbar({ message: 'Đã xoá cache' })
@@ -144,12 +144,6 @@ const ProfileMenu = ({ className }) => {
           )}
         </div>
       </div>
-      {authPopup.show && (
-        <LoginPopup
-          activeTab={authPopup.activeTab}
-          onClose={() => setAuthPopup(false)}
-        />
-      )}
     </div>
   )
 }

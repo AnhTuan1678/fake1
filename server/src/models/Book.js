@@ -18,21 +18,13 @@ const Book = sequelize.define(
     total_rating: { type: DataTypes.INTEGER, defaultValue: 0 },
     url_avatar: {
       type: DataTypes.STRING,
-      defaultValue:
-        'https://p6-novel.byteimg.com/novel-pic/p2o37825e1ebc684e7b9d28ef1ad077c9b9~tplv-shrink:640:0.image',
-    },
-    genres: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
-      defaultValue: [],
+      defaultValue: 'https://docln.net/img/nocover.jpg',
     },
 
     created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updated_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   },
-  {
-    tableName: 'books',
-    timestamps: false,
-  },
+  { tableName: 'books', timestamps: false },
 )
 
 module.exports = Book

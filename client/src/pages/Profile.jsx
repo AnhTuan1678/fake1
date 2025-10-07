@@ -1,41 +1,48 @@
 import { useEffect, useState, useRef } from 'react'
-import { getProfile, updateAvatar, getUserProgress } from '../services/api'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { userAPI, progressAPI } from '../services/api'
 import { formatterProfile } from '../utils/formatter'
 import styles from './Profile.module.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faFolder, faKey } from '@fortawesome/free-solid-svg-icons'
+import {
+  faCircleNotch,
+  faFolder,
+  faKey,
+} from '@fortawesome/free-solid-svg-icons'
 import { useDispatch } from 'react-redux'
 import { updateAvatar as updateAvatarAction } from '../redux/userSlice'
 import StoryCard from '../components/StoryCard'
-import ChangePasswordPopup from '../components/ChangePasswordPopup'
 import { formatterStoryDetail } from '../utils/formatter'
+import GuestNotice from '../components/GuestNotice'
 
 const Profile = () => {
   const [profile, setProfile] = useState()
   const [progress, setProgress] = useState()
   const fileInputRef = useRef(null)
-  const [visibleCount, setVisibleCount] = useState(12)
-  const [isOpenChangePass, setIsOpenChangePass] = useState(false)
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
+
+  const user = useSelector((state) => state.user)
+
+  const navigate = useNavigate()
+  const location = useLocation()
 
   const dispatch = useDispatch()
 
   useEffect(() => {
     async function fetchData() {
-      const token = localStorage.getItem('token')
-      const data = await getProfile(token)
+      const token = user.token
+      if (!token) return
+      const data = await userAPI.getProfile(token)
       setProfile(formatterProfile(data))
-      const res = await getUserProgress(token)
-      setProgress(res)
+      const res = await progressAPI.getMyProgress(token, { limit: 12 })
+      setProgress(res.data)
     }
     fetchData()
-  }, [])
+  }, [user.token])
 
-  if (!localStorage.getItem('token')) {
-    return (
-      <div className='d-flex justify-content-center align-items-center vh-100'>
-        <p className='text-muted'>Bạn chưa đăng nhập</p>
-      </div>
-    )
+  if (!user.isLoggedIn) {
+    return <GuestNotice />
   }
 
   const handleAvatarClick = () => {
@@ -49,19 +56,34 @@ const Profile = () => {
     const formData = new FormData()
     formData.append('avatar', file)
 
+    setIsUploadingAvatar(true)
+
     try {
       const token = localStorage.getItem('token')
-      const updatedProfile = await updateAvatar(token, formData)
+      const updatedProfile = await userAPI.updateAvatar(token, formData)
       dispatch(updateAvatarAction(updatedProfile.avatarUrl))
       setProfile(updatedProfile)
     } catch (err) {
       console.error('Cập nhật avatar thất bại', err)
+    } finally {
+      setIsUploadingAvatar(false)
     }
   }
 
   return (
     profile && (
       <div className='container my-4 flex-grow-1'>
+        {isUploadingAvatar && (
+          <div className='cus-overlay' style={{ zIndex: 100 }}>
+            <FontAwesomeIcon
+              className='start-50'
+              icon={faCircleNotch}
+              spin
+              size='5x'
+              color='#fff'
+            />
+          </div>
+        )}
         <div className='position-relative mb-5'>
           <div
             className='w-100 bg-secondary d-flex align-items-center justify-content-center text-white fw-bold'
@@ -74,7 +96,7 @@ const Profile = () => {
             <div
               className={`position-relative rounded-circle border border-dark overflow-hidden ${styles.avatar}`}>
               <img
-                src={profile?.avatarUrl}
+                src={profile?.avatarUrl || './avatar.png'}
                 alt='avatar'
                 style={{ width: '100px', height: '100px' }}
               />
@@ -100,16 +122,13 @@ const Profile = () => {
           <button
             className='btn btn-warning'
             onClick={() => {
-              setIsOpenChangePass(true)
+              navigate('/auth?action=cp', {
+                state: { from: location.pathname },
+              })
             }}>
             <FontAwesomeIcon icon={faKey} className='me-2' />
             Đổi mật khẩu
           </button>
-          <ChangePasswordPopup
-            isOpen={isOpenChangePass}
-            onClose={() => setIsOpenChangePass(false)}
-            token={localStorage.getItem('token')}
-          />
         </div>
 
         <div className='row'>
@@ -149,15 +168,15 @@ const Profile = () => {
 
           {/* Right: Story info */}
           <div className='col-md-8 m-0 p-0'>
-            <div className='mb-3 border shadow p-2 m-0 rounded'>
-              <h5 className='border-bottom pb-2'>
+            <div className='mb-3 border shadow p-2 m-0 rounded cus-container'>
+              <h5 className='border-bottom pb-2 m-3 fs-3 fw-normal text-blue'>
                 Truyện đã đăng ({profile.storiesPosted})
               </h5>
               {profile.storiesPosted === 0 && <p>Không có truyện nào</p>}
             </div>
             {progress && (
-              <div className='mb-3 border shadow p-2 m-0 rounded'>
-                <h5 className='border-bottom pb-2'>
+              <div className='mb-3 border shadow p-2 m-0 rounded cus-container'>
+                <h5 className='border-bottom pb-2 m-3 fs-3 fw-normal text-blue'>
                   Truyện đã đọc ({progress?.length})
                 </h5>
                 {progress?.length === 0 ? (
@@ -165,7 +184,7 @@ const Profile = () => {
                 ) : (
                   <>
                     <div className='row mx-0'>
-                      {progress.slice(0, visibleCount).map((book) => (
+                      {progress.map((book) => (
                         <StoryCard
                           key={book.id}
                           story={formatterStoryDetail(book.Book)}
@@ -173,22 +192,14 @@ const Profile = () => {
                         />
                       ))}
                     </div>
-                    {visibleCount < progress.length && (
-                      <div className='text-center'>
-                        <button
-                          className='btn btn-outline-primary m-3'
-                          onClick={() => setVisibleCount(visibleCount + 12)}>
-                          Xem thêm
-                        </button>
-                        <button
-                          className='btn btn-outline-primary m-3'
-                          onClick={() =>
-                            setVisibleCount(visibleCount + 9999999)
-                          }>
-                          Xem tất cả
-                        </button>
-                      </div>
-                    )}
+
+                    <div className='text-center'>
+                      <button
+                        className='btn btn-outline-primary'
+                        onClick={() => navigate('/history')}>
+                        Xem tất cả
+                      </button>
+                    </div>
                   </>
                 )}
               </div>

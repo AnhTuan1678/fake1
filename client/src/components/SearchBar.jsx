@@ -1,9 +1,17 @@
 import { useState, useEffect, useRef } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSearch } from '@fortawesome/free-solid-svg-icons'
+import {
+  faClock,
+  faEye,
+  faHeart,
+  faList,
+  faSearch,
+  faStar,
+} from '@fortawesome/free-solid-svg-icons'
 import styles from './SearchBar.module.css'
-import { searchBooks } from '../services/api'
+import { bookAPI } from '../services/api'
 import { useNavigate } from 'react-router-dom'
+import { timeAgo } from '../utils/timeAgo'
 
 const SearchBar = ({ className = '' }) => {
   const [query, setQuery] = useState('')
@@ -11,6 +19,7 @@ const SearchBar = ({ className = '' }) => {
   const [results, setResults] = useState([])
   const [showDropdown, setShowDropdown] = useState(false)
   const [highlightedIndex, setHighlightedIndex] = useState(-1) // index đang focus
+  const [isClosing, setIsClosing] = useState(false)
   const wrapperRef = useRef(null)
 
   const navigate = useNavigate()
@@ -23,13 +32,19 @@ const SearchBar = ({ className = '' }) => {
 
   useEffect(() => {
     if (!debouncedQuery.trim()) {
-      setResults([])
-      setShowDropdown(false)
+      closeDropdown()
       return
     }
 
+    if (debouncedQuery.trim().length < 2) return
+
     const fetchData = async () => {
-      const data = await searchBooks(debouncedQuery)
+      const data = await bookAPI.searchBooks({ query: debouncedQuery })
+      if (data.length === 0) {
+        closeDropdown()
+        return
+      }
+      console.log(data)
       setResults(data)
       setShowDropdown(true)
       setHighlightedIndex(-1) // reset highlight khi search mới
@@ -42,7 +57,7 @@ const SearchBar = ({ className = '' }) => {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
-        setShowDropdown(false)
+        closeDropdown()
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -52,7 +67,7 @@ const SearchBar = ({ className = '' }) => {
   // Chọn sách
   const handleSelect = (book) => {
     setQuery('')
-    setShowDropdown(false)
+    closeDropdown()
     navigate(`/story/${book.id}`)
   }
 
@@ -74,6 +89,18 @@ const SearchBar = ({ className = '' }) => {
     }
   }
 
+  const closeDropdown = () => {
+    setIsClosing(true)
+    const lastRes = results
+    setTimeout(() => {
+      if (lastRes === results) {
+        setShowDropdown(false)
+        setResults([])
+        setIsClosing(false)
+      }
+    }, 300)
+  }
+
   return (
     <div
       className={`${className} align-items-center dropdown ${styles['search-bar']}`}
@@ -87,7 +114,7 @@ const SearchBar = ({ className = '' }) => {
       }
       ref={wrapperRef}>
       <form
-        className={`d-flex align-items-center w-100 rounded-pill overflow-hidden rounded-t-3 p-1 pb-0`}
+        className='d-flex align-items-center w-100 rounded-pill overflow-hidden rounded-t-3 p-1 pb-0'
         onSubmit={(e) => e.preventDefault()}>
         <input
           type='text'
@@ -105,30 +132,33 @@ const SearchBar = ({ className = '' }) => {
       </form>
 
       <div
-        className='position-absolute rounded-b-3 start-0 end-0 p-0 m-0 overflow-hidden'
+        className='position-absolute start-0 end-0 p-0 m-0 overflow-hidden bg-transparent'
         style={{
           backgroundColor: 'inherit',
           borderBottomLeftRadius: '12px',
           borderBottomRightRadius: '12px',
         }}>
-        {showDropdown && results.length > 0 && (
-          <ul className='show p-0 overflow-hidden m-0'>
+        {(showDropdown || isClosing) && (
+          <ul
+            className={`show p-0 overflow-hidden m-0 animate__animated animate__faster ${
+              isClosing ? 'animate__fadeOutUp' : 'animate__fadeInDown'
+            }`}>
             {results.map((book, index) => (
               <li
                 key={book.id}
                 className={`${styles['dropdown-item']} ${
                   index === highlightedIndex ? styles.highlighted : ''
-                } d-flex align-items-center gap-2 p-1 cursor-pointer border-bottom`}
+                } d-flex align-items-center gap-2 p-1 cursor-pointer border-top border-secondary`}
                 onClick={() => handleSelect(book)}
                 onMouseEnter={() => setHighlightedIndex(index)}>
                 <img
-                  src={book.url_avatar}
+                  src={book.urlAvatar}
                   alt={book.title}
                   className={`${styles['book-cover']} flex-shrink-0 object-fit-cover`}
                 />
                 <div className={`d-flex flex-column overflow-hidden`}>
                   <div
-                    className={`${styles['book-title']} fw-bold fs-6 mb-1 overflow-hidden text-nowrap`}>
+                    className={`${styles['book-title']} fw-semibold fs-7 mb-1 overflow-hidden text-nowrap`}>
                     {book.title}
                   </div>
                   <div className={styles['book-author']}>
@@ -136,10 +166,29 @@ const SearchBar = ({ className = '' }) => {
                   </div>
                   <div className={styles['book-meta']}>
                     <span className='text-nowrap'>
-                      Cập nhật: {book.updatedAt}
+                      {book.totalRating / (book.reviewCount || 1)}
+                      <FontAwesomeIcon icon={faStar} color='gold' />
                     </span>
                     <span className='text-nowrap'>
-                      Số chương: {book.chapterCount}
+                      Tình trạng: {book.status}
+                    </span>
+                  </div>
+                  <div className={styles['book-meta']}>
+                    <span className='text-nowrap'>
+                      <FontAwesomeIcon icon={faClock} />
+                      {timeAgo(book.updatedAt)}
+                    </span>
+                    <span className='text-nowrap'>
+                      <FontAwesomeIcon icon={faList} />
+                      {book.chapterCount}
+                    </span>
+                    <span className='text-nowrap'>
+                      <FontAwesomeIcon icon={faEye} />
+                      {book.views}
+                    </span>
+                    <span className='text-nowrap'>
+                      <FontAwesomeIcon icon={faHeart} />
+                      {book.like}
                     </span>
                   </div>
                 </div>

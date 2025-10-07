@@ -1,0 +1,111 @@
+.floating-label {
+    color: #595358;
+    position: relative;
+}
+
+.floating-label input {
+    width: 100%;
+    border: 1px solid #595358;
+    border-radius: 6px;
+    outline: none;
+    font-size: 16px;
+    padding: 12px;
+}
+
+.floating-label label {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    left: 15px;
+    top: 15px;
+    background: white;
+    padding: 0 2px;
+    transition: 0.3s ease;
+    pointer-events: none;
+}
+
+.floating-label input:hover {
+    border-color: #291927;
+    box-shadow: 0 0 0 1px #291927;
+}
+
+.floating-label input:focus {
+    border-color: #6a68ce;
+    box-shadow: 0 0 0 1px #6a68ce;
+}
+
+/* Khi input focus hoặc có nội dung */
+.floating-label input:focus + label,
+.floating-label input:not(:placeholder-shown) + label {
+    top: -8px;
+    left: 8px;
+    font-size: 13px;
+    color: #9c1b5d;
+    transform: scale(0.95);
+}
+
+.dot {
+    width: 15px;
+    height: 15px;
+}
+
+.dot .ping {
+    border: 1px solid #f33;
+    width: 9px;
+    height: 9px;
+    background-color: rgba(238, 46, 36, 0.2);
+    border-radius: 50%;
+    animation-name: sonar;
+    animation-duration: 1.25s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+    display: block;
+    position: absolute;
+    transform: translate(-50%, -50%);
+}
+
+.dot .core {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background-color: #f33;
+    position: absolute;
+    transform: translate(50%, 50%);
+}
+
+@keyframes sonar {
+    0% {
+        opacity: 0.9;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(2.8);
+    }
+}
+
+.slide-in-hover {
+    overflow: hidden;
+    position: relative;
+}
+
+.slide-in-hover::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(128, 128, 128, 0.3);
+    transform: translateX(calc(-100% - 2px));
+    transition: transform 0.3s ease;
+    z-index: 0;
+}
+
+.slide-in-hover:hover::before {
+    transform: translateX(0);
+}
+
+.slide-in-hover:hover {
+    color: var(--primary--color);
+}

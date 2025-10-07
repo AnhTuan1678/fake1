@@ -7,7 +7,11 @@ const User = sequelize.define(
     username: { type: DataTypes.STRING(50), allowNull: false, unique: true },
     email: { type: DataTypes.STRING(100), allowNull: false, unique: true },
     password_hash: { type: DataTypes.TEXT, allowNull: false },
-    avatar_url: { type: DataTypes.TEXT, allowNull: true },
+    avatar_url: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      defaultValue: 'https://bit.ly/478koYr',
+    },
     personal_settings: { type: DataTypes.JSONB, defaultValue: {} },
     created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updated_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },

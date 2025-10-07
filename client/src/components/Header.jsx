@@ -1,9 +1,12 @@
 import './Header.module.css'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ProfileMenu from './ProfileMenu'
 import SearchBar from './SearchBar'
 import style from './Header.module.css'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faArrowsRotate } from '@fortawesome/free-solid-svg-icons'
+import NavBar from './NavBar'
 
 const Header = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
@@ -13,16 +16,26 @@ const Header = () => {
 
   const navigate = useNavigate()
 
+  const fixedRef = useRef(null)
+  const [height, setHeight] = useState(0)
+
+  useEffect(() => {
+    if (fixedRef.current) {
+      setHeight(fixedRef.current.offsetHeight) // Hoặc .getBoundingClientRect().height
+    }
+  }, [])
+
   // scroll xuống → ẩn header
   // scroll lên → hiện header
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY
+      const delta = currentScrollY - lastScrollY
 
-      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+      if (delta > 0 && currentScrollY > 50) {
         if (show) setAnimation('animate__slideOutUp')
         setShow(false)
-      } else {
+      } else if (delta < -10) {
         if (!show) setAnimation('animate__slideInDown')
         setShow(true)
       }
@@ -44,42 +57,67 @@ const Header = () => {
 
   return (
     <>
-      <div className={`${style.header} animate__animated ${animation}`}>
+      <div
+        className={`${style.header} animate__animated ${animation}`}
+        ref={fixedRef}>
         {isMobile ? (
-          <div
-            className={`d-flex flex-column align-items-center container p-1`}>
-            <div className={`d-flex align-items-center container p-1`}>
-              <h1
-                className={`logo fs-4 animate__animated animate__fadeInLeft flex-grow-1 p-0 m-0`}
-                style={{ fontFamily: 'Ananda' }}
-                onClick={() => navigate(`/`)}>
-                Nadark
-                {/* {import.meta.env.VITE_APP_NAME} */}
-              </h1>
-
-              <ProfileMenu className='flex-grow-1' />
-            </div>
-            <SearchBar className='flex-grow-1' />
-          </div>
+          <MobileHeader />
         ) : (
           <div className={`d-flex align-items-center container p-1`}>
-            <div className='flex-grow-1'>
+            <div className='flex-grow-1 d-flex'>
               <h1
-                className={`logo fs-4 animate__animated animate__fadeInLeft  cursor-pointer d-inline-block p-0 m-0`}
+                className={`pt-1 logo fs-4 animate__animated animate__fadeInLeft  cursor-pointer d-inline-block p-0 m-0 ${style.logo}`}
                 onClick={() => navigate(`/`)}
                 style={{ fontFamily: 'Ananda' }}>
-                Nadark
-                {/* {import.meta.env.VITE_APP_NAME} */}
+                {/* Nadark */}
+                {import.meta.env.VITE_APP_NAME}
               </h1>
             </div>
-
             <SearchBar />
             <ProfileMenu className='ps-2' />
           </div>
         )}
       </div>
-      <div style={{ height: isMobile ? '90px' : '50px' }}></div>
+      <div style={{ height: height }}></div>
+      <NavBar />
     </>
+  )
+}
+
+const MobileHeader = () => {
+  const navigate = useNavigate()
+  const [showSearch, setShowSearch] = useState(false)
+
+  return (
+    <div className='d-flex h-100'>
+      {/* Nút toggle */}
+      <button
+        className='btn ps-1 pe-1 m-0 p-0 btn-light rounded-0 shadow'
+        onClick={() => setShowSearch((prev) => !prev)}>
+        <FontAwesomeIcon icon={faArrowsRotate} />
+      </button>
+      <div className='d-flex w-100 flex-column p-0 ms-2 me-2 justify-content-center'>
+        {/* Logo + Profile */}
+        {!showSearch && (
+          <div className='d-flex align-items-center p-0 m-0 animate__animated animate__fadeInDown animate__faster'>
+            <h1
+              className={`logo fs-4 m-0 ${style.logo} cursor-pointer`}
+              style={{ fontFamily: 'Ananda' }}
+              onClick={() => navigate('/')}>
+              {import.meta.env.VITE_APP_NAME}
+            </h1>
+            <ProfileMenu className='flex-grow-1' />
+          </div>
+        )}
+
+        {/* Search Bar */}
+        {showSearch && (
+          <div className='d-flex p-0 animate__animated animate__fadeInDown animate__faster'>
+            <SearchBar className='w-100' />
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
 
